@@ -5,7 +5,9 @@ OnScreenKeyboard for M5Stack.
 
  which can be operated with 3 button.
 
-M5Stack–{‘Ì‚Ì‚Rƒ{ƒ^ƒ“‚Å‘€ì‚Å‚«‚éƒIƒ“ƒXƒNƒŠ[ƒ“ƒL[ƒ{[ƒhB
+M5Stackæœ¬ä½“ã®ï¼“ãƒœã‚¿ãƒ³ã§æ“ä½œã§ãã‚‹ã‚ªãƒ³ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã€‚
+
+![image](https://user-images.githubusercontent.com/42724151/50738003-86b17980-1212-11e9-9cbf-319bbd885cd9.png)
 
 ## Licence
 
