@@ -7,12 +7,13 @@
 class M5OnScreenKeyboard
 {
 public:
-  uint16_t editFontColor = 0x0000;
-  uint16_t editFillColor = 0xFFFF;
   uint16_t fontColor   = 0xFFFF;
-  uint16_t fillColor   = 0x630C;
+  uint16_t backColor   = 0x630C;
   uint16_t frameColor  = 0x0208;
-  uint16_t cursorColor = 0x421F;
+  uint16_t focusFontColor = 0xFFFF;
+  uint16_t focusBackColor = 0x421F;
+  uint16_t editFontColor = 0x0000;
+  uint16_t editBackColor = 0xFFFF;
   uint8_t bottomOffset = 14;
   uint8_t keyHeight = 12;
   uint8_t textYOffset = 3;
@@ -20,7 +21,7 @@ public:
   uint16_t msecRepeat= 150;
   uint8_t maxlength = 52;
 
-  String getString() { return _string; }
+  String getString() const { return _string; }
   void setString(const String& value) {
     _string = value; drawTextbox();
     _cursorPos = _string.length();
@@ -42,7 +43,7 @@ public:
     uint32_t msec = millis();
 
     // draw blink cursor.
-    M5.Lcd.drawFastVLine(_cursorPos * 6, getY(-1) + textYOffset, 8, (msec / 150) % 2 ? 0xffff : 0);
+    M5.Lcd.drawFastVLine(_cursorPos * 6, getY(-1) + textYOffset, 8, (msec / 150) % 2 ? editBackColor : editFontColor);
 
     if (msec < _msecNext) return true;
 
@@ -236,11 +237,11 @@ private:
   }
 
   void drawTextbox() {
-    M5.Lcd.setTextColor(0x0000);
+    M5.Lcd.setTextColor(editFontColor);
     int y = getY(-1);
     M5.Lcd.setCursor(1, y + textYOffset);
     M5.Lcd.drawFastHLine(0, y, TFT_HEIGHT, frameColor);
-    M5.Lcd.fillRect(0, y + 1, TFT_HEIGHT, keyHeight - 1, 0xffff);
+    M5.Lcd.fillRect(0, y + 1, TFT_HEIGHT, keyHeight - 1, editBackColor);
     M5.Lcd.print(_string);
   }
 
@@ -260,17 +261,17 @@ private:
   }
 
   void drawKeyboard(int col, int x, int y, int h) {
-    M5.Lcd.setTextColor(fontColor);
-    M5.Lcd.fillRect(x+1, y, KEYWIDTH-1, h, fillColor);
+    M5.Lcd.fillRect(x+1, y, KEYWIDTH-1, h, backColor);
     if (_nowCol == col) {
-      M5.Lcd.fillRect(x+1, getY(_nowRow)+1, KEYWIDTH - 1, keyHeight - 1, cursorColor);
+      M5.Lcd.fillRect(x+1, getY(_nowRow)+1, KEYWIDTH - 1, keyHeight - 1, focusBackColor);
       if (_state == LEFTRIGHT) {
-        M5.Lcd.drawRect(x+1, y+1, KEYWIDTH - 1, h - 1, cursorColor);
-        M5.Lcd.drawRect(x+2, y+2, KEYWIDTH - 3, h - 3, cursorColor);
+        M5.Lcd.drawRect(x+1, y+1, KEYWIDTH - 1, h - 1, focusBackColor);
+        M5.Lcd.drawRect(x+2, y+2, KEYWIDTH - 3, h - 3, focusBackColor);
       }
     }
     for (int r = 0; r < ROWCOUNT; r++) {
       y = getY(r);
+      M5.Lcd.setTextColor(_nowCol == col && _nowRow == r ? focusFontColor : fontColor);
       drawKeyTop(col, r, x, y);
       M5.Lcd.drawFastHLine(x, y, KEYWIDTH, frameColor);
     }
