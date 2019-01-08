@@ -3,6 +3,7 @@
 
 #include <M5ButtonDrawer.h>
 #include <M5PLUSEncoder.h>
+#include <M5JoyStick.h>
 
 enum 
 { TABLECOUNT  = 3
@@ -60,6 +61,8 @@ bool M5OnScreenKeyboard::loop() {
   bool canRepeat = (msec >= _msecNext);
 
   bool mod = false;
+  bool noinput = true;
+  int oldRepeat = _repeat;
   M5.update();
 
   // BtnA Pressing Fn _state
@@ -80,13 +83,13 @@ bool M5OnScreenKeyboard::loop() {
     switch (_state) {
     case LEFTRIGHT:   // left right moving
       if (M5.BtnA.wasReleased() && !_fn) { --_nowCol; }
-      if (M5.BtnB.wasPressed() || (M5.BtnB.isPressed() && canRepeat)) { if (++_repeat < COLUMNCOUNT) ++_nowCol; }
+      if (M5.BtnB.isPressed()) { noinput = false; if (M5.BtnB.wasPressed() || canRepeat) { if (++_repeat < COLUMNCOUNT) ++_nowCol; } }
       if (M5.BtnC.wasPressed()) { mod = true; _state = UPDOWN; _repeat = -1; }
       break;
     case UPDOWN:    // up down moving
       if (M5.BtnA.wasReleased() && !_fn) { --_nowRow; }
-      if (M5.BtnB.wasPressed() || (M5.BtnB.isPressed() && canRepeat)) { if (++_repeat < ROWCOUNT) ++_nowRow; }
-      if (M5.BtnC.wasPressed() || (M5.BtnC.isPressed() && canRepeat)) { mod = true; ++_repeat; pressKey(); }
+      if (M5.BtnB.isPressed()) { noinput = false; if (M5.BtnB.wasPressed() || canRepeat) { if (++_repeat < ROWCOUNT) ++_nowRow; } }
+      if (M5.BtnC.isPressed()) { noinput = false; if (M5.BtnC.wasPressed() || canRepeat) { mod = true; ++_repeat; pressKey(); } }
       if (M5.BtnC.wasReleased() && 0 < _repeat) { mod = true; _state = LEFTRIGHT; }
 
       break;
@@ -111,6 +114,16 @@ bool M5OnScreenKeyboard::loop() {
     }
   }
 #endif
+//#ifndef _M5JOYSTICK_H_
+  if (JoyStick.update()) {
+    if (JoyStick.isLeft() ) { noinput = false; if (JoyStick.wasLeft()  || canRepeat) { --_nowCol; ++_repeat; } }
+    if (JoyStick.isRight()) { noinput = false; if (JoyStick.wasRight() || canRepeat) { ++_nowCol; ++_repeat; } }
+    if (JoyStick.isUp()   ) { noinput = false; if (JoyStick.wasUp()    || canRepeat) { --_nowRow; ++_repeat; } }
+    if (JoyStick.isDown() ) { noinput = false; if (JoyStick.wasDown()  || canRepeat) { ++_nowRow; ++_repeat; } }
+    if (JoyStick.wasClicked()) { mod = true; pressKey(); }
+    if (JoyStick.wasHold()) { mod = true; switchTable(); }
+  }
+//#endif
   updateButton();
   ButtonDrawer.draw();
   if (_oldCol != _nowCol || _oldRow != _nowRow || _oldTbl != _nowTbl || mod) {
@@ -127,7 +140,7 @@ bool M5OnScreenKeyboard::loop() {
     _oldCol = _nowCol;
     _oldRow = _nowRow;
   } else {
-    if (M5.BtnB.isReleased() && M5.BtnC.isReleased()) {
+    if (noinput) {
       _repeat = 0;
       _msecNext = -1;
     }
