@@ -3,7 +3,7 @@
 
 #include <M5Stack.h>
 
-class M5Joystick
+class M5JoyStick
 {
 public:
   uint16_t msecHold = 300;
@@ -50,5 +50,5 @@ private:
 
 #endif
 
-extern M5Joystick JoyStick;
+extern M5JoyStick JoyStick;
 

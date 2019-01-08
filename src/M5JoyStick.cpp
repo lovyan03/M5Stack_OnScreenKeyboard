@@ -1,10 +1,10 @@
 #include <M5JoyStick.h>
 
-M5Joystick JoyStick;
+M5JoyStick JoyStick;
 
 static int ValueConv(int v) { return (v < 48) ? -2 : (v < 64) ? -1 : (v > 207) ?  2 : (v > 191) ?  1 : 0; }
 
-bool M5Joystick::update()
+bool M5JoyStick::update()
 {
   if (!Wire.requestFrom(0x52,3)) return false;
   _time = millis();
