@@ -1,4 +1,4 @@
-
+ 
 #include <M5Stack.h>
 #include <M5OnScreenKeyboard.h>
 
@@ -6,7 +6,7 @@ M5OnScreenKeyboard m5osk;
 
 void setup() {
   M5.begin();
-
+  Wire.begin();
 /* // color change example.
   m5osk.fontColor   = 0x0208;
   m5osk.backColor   = 0xFFFF;
@@ -25,7 +25,9 @@ void setup() {
   m5osk.setup("Hello World.");
 }
 void loop() {
+
   while (m5osk.loop()) delay(1);
+
   String text = m5osk.getString();
   m5osk.close();
 

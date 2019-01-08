@@ -2,7 +2,6 @@
 #define _M5ONSCREENKEYBOARD_H_
 
 #include <M5Stack.h>
-#include <M5ButtonDrawer.h>
 
 class M5OnScreenKeyboard
 {
@@ -45,13 +44,12 @@ private:
   uint32_t _msecNext = 0;
   int _repeat;
   String _string;
-  M5ButtonDrawer _buttonDrawer;
 
   int getX(int col) const;
   int getY(int row) const;
   void updateButton();
   void switchTable();
-  bool pressKey();
+  void pressKey();
   void drawKeyTop(int c, int r, int x = -1, int y = -1);
   void drawTextbox();
   void drawKeyboard();

@@ -1,6 +1,9 @@
 #include <M5OnScreenKeyboard.h>
 #include <M5Stack.h>
 
+#include <M5ButtonDrawer.h>
+#include <M5PLUSEncoder.h>
+
 enum 
 { TABLECOUNT  = 3
 , ROWCOUNT    = 4
@@ -83,33 +86,33 @@ bool M5OnScreenKeyboard::loop() {
     case UPDOWN:    // up down moving
       if (M5.BtnA.wasReleased() && !_fn) { --_nowRow; }
       if (M5.BtnB.wasPressed() || (M5.BtnB.isPressed() && canRepeat)) { if (++_repeat < ROWCOUNT) ++_nowRow; }
-      if (M5.BtnC.wasPressed() || (M5.BtnC.isPressed() && canRepeat)) { mod = true; ++_repeat; if (!pressKey()) return false; }
+      if (M5.BtnC.wasPressed() || (M5.BtnC.isPressed() && canRepeat)) { mod = true; ++_repeat; pressKey(); }
       if (M5.BtnC.wasReleased() && 0 < _repeat) { mod = true; _state = LEFTRIGHT; }
 
       break;
     }
     _fn = false;
   }
-#ifdef _PLUSEncoder_H_
-  if (PlusEncoder.update()) {
+#ifdef _M5PLUSENCODER_H_
+  if (PLUSEncoder.update()) {
     switch (_state) {
     case LEFTRIGHT:   // left right moving
-      if (PlusEncoder.isLongClick()) { mod = true; switchTable(); break; } 
-      if (PlusEncoder.wasUp())       { --_nowCol; }
-      if (PlusEncoder.wasDown())     { ++_nowCol; }
-      if (PlusEncoder.isClick())     { mod = true; _state = UPDOWN; }
+      if (PLUSEncoder.wasUp())       { --_nowCol; }
+      if (PLUSEncoder.wasDown())     { ++_nowCol; }
+      if (PLUSEncoder.wasHold())     { mod = true; switchTable(); break; } 
+      if (PLUSEncoder.wasClicked())  { mod = true; _state = UPDOWN; }
       break;
     case UPDOWN:    // up down moving
-      if (PlusEncoder.isLongClick()) { mod = true; _state = LEFTRIGHT; }
-      if (PlusEncoder.wasUp())       { --_nowRow; }
-      if (PlusEncoder.wasDown())     { ++_nowRow; }
-      if (PlusEncoder.isClick())     { mod = true; if (!pressKey()) return false; }
+      if (PLUSEncoder.wasUp())       { --_nowRow; }
+      if (PLUSEncoder.wasDown())     { ++_nowRow; }
+      if (PLUSEncoder.wasHold())     { mod = true; _state = LEFTRIGHT; }
+      if (PLUSEncoder.wasClicked())  { mod = true; pressKey(); _state = LEFTRIGHT; }
       break;
     }
   }
 #endif
   updateButton();
-  _buttonDrawer.draw();
+  ButtonDrawer.draw();
   if (_oldCol != _nowCol || _oldRow != _nowRow || _oldTbl != _nowTbl || mod) {
     _nowCol = (_nowCol + COLUMNCOUNT) % COLUMNCOUNT;
     _nowRow = (_nowRow + ROWCOUNT   ) % ROWCOUNT;
@@ -144,13 +147,13 @@ int M5OnScreenKeyboard::getY(int row) const { return TFT_WIDTH - bottomOffset - 
 void M5OnScreenKeyboard::updateButton() {
   if (M5.BtnA.isPressed()) {
     switch (_state) {
-    case LEFTRIGHT: _buttonDrawer.setText(_fn?"Fn":"Left", "Panel", "Finish"); break;
-    case UPDOWN:    _buttonDrawer.setText(_fn?"Fn":"Up", "Panel", "Column"); break;
+    case LEFTRIGHT: ButtonDrawer.setText(_fn?"Fn":"Left", "Panel", "Finish"); break;
+    case UPDOWN:    ButtonDrawer.setText(_fn?"Fn":"Up", "Panel", "Column"); break;
     }
   } else {
     switch (_state) {
-    case LEFTRIGHT: _buttonDrawer.setText("Left/Fn", "Right", "Row"); break;
-    case UPDOWN:    _buttonDrawer.setText("Up/Fn", "Down", "Ok"); break;
+    case LEFTRIGHT: ButtonDrawer.setText("Left/Fn", "Right", "Row"); break;
+    case UPDOWN:    ButtonDrawer.setText("Up/Fn", "Down", "Ok"); break;
     }
   }
 }
@@ -158,7 +161,7 @@ void M5OnScreenKeyboard::switchTable() {
   _nowTbl = ++_nowTbl % TABLECOUNT;
 }
 
-bool M5OnScreenKeyboard::pressKey() {
+void M5OnScreenKeyboard::pressKey() {
   switch (_chartbl[_nowTbl][_nowRow][_nowCol]) {
   case BS  :  if (0 < _cursorPos) {
                 _string = _string.substring(0, _cursorPos-1) + _string.substring(_cursorPos);
@@ -179,7 +182,6 @@ bool M5OnScreenKeyboard::pressKey() {
     break;
   }
   drawTextbox();
-  return true;
 }
 
 void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y) {

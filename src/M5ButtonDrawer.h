@@ -26,3 +26,6 @@ private:
 };
 
 #endif
+
+extern M5ButtonDrawer ButtonDrawer;
+
