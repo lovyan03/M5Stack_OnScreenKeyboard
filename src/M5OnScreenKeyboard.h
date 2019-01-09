@@ -11,8 +11,8 @@ public:
   uint16_t frameColor  = 0x0208;
   uint16_t focusFontColor = 0xFFFF;
   uint16_t focusBackColor = 0x421F;
-  uint16_t editFontColor = 0x0000;
-  uint16_t editBackColor = 0xFFFF;
+  uint16_t textboxFontColor = 0x0000;
+  uint16_t textboxBackColor = 0xFFFF;
   uint8_t bottomOffset = 14;
   uint8_t keyHeight = 12;
   uint8_t textYOffset = 3;
@@ -20,16 +20,21 @@ public:
   uint16_t msecRepeat= 150;
   uint8_t maxlength = 52;
 
-  void setup(const String& value);
+  bool useTextbox = true;
+
+  void setup(const String& value = "");
   bool loop();
   void close();
 
-  String getString() const { return _string; }
-  void setString(const String& value);
+  void draw();
 
+  String getString() const { return _string; }
+  void setString(const String& value = "");
+  char getKeyCode() const { return _keyCode; }
 private:
   enum eState
-  { LEFTRIGHT
+  { APPEAR
+  , LEFTRIGHT
   , UPDOWN
   };
   eState _state;
@@ -41,8 +46,10 @@ private:
   int8_t _oldCol = 0;
   int8_t _oldRow = 0;
   int8_t _cursorPos = 0;
+  uint32_t _msec = 0;
   uint32_t _msecNext = 0;
   int _repeat;
+  char _keyCode;
   String _string;
 
   int getX(int col) const;
@@ -50,11 +57,12 @@ private:
   void updateButton();
   void switchTable();
   void pressKey();
-  void drawKeyTop(int c, int r, int x = -1, int y = -1);
+  void drawKeyTop(int c, int r, int x, int y);
   void drawTextbox();
-  void drawKeyboard();
-  void drawKeyboard(int col);
-  void drawKeyboard(int col, int x, int y, int h);
+  void drawKeyboard(int h = -1);
+  void drawColumn(int col);
+  void drawColumn(int col, int x, int y, int h);
+  bool appear();
 };
 
 #endif
