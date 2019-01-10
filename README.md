@@ -36,7 +36,7 @@ in row select mode:
 in morse code mode:  
  **Button B click** : Input a short pulse.   
  **Button C click** : Input a long pulse.  
- **Release your hand for 1 second** : Fix input.
+ **Release your hand for 1 second** : Fix input.  
  **Button A hold and Button B click** : Keyboard panel switches.  
  **Button A hold and Button C click** : Finish keyboard input.  
 
