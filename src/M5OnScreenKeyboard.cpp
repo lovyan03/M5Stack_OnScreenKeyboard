@@ -122,7 +122,7 @@ bool M5OnScreenKeyboard::loop() {
     } else
     if (M5.BtnC.wasPressed()) {
       _fn = true;
-      if (_state == LEFTRIGHT) {
+      if (_state == LEFTRIGHT || _state == MORSE) {
         return false; 
       }
       mod = true; 
