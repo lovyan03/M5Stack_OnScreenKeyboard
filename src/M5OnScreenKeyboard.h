@@ -14,8 +14,8 @@ public:
   uint16_t textboxFontColor = 0x0000;
   uint16_t textboxBackColor = 0xFFFF;
   uint8_t bottomOffset = 14;
-  uint8_t keyHeight = 12;
-  uint8_t textYOffset = 3;
+  uint8_t keyHeight = 14;
+  uint8_t textYOffset = 4;
   uint16_t msecHold = 300;
   uint16_t msecRepeat= 150;
   uint8_t maxlength = 52;
@@ -36,6 +36,7 @@ private:
   { APPEAR
   , LEFTRIGHT
   , UPDOWN
+  , MORSE
   };
   eState _state;
   int8_t _fn = 0;
@@ -51,13 +52,20 @@ private:
   int _repeat;
   char _keyCode;
   String _string;
+  int8_t _morsePos;
+  int16_t _morseInputBuf;
 
   int getX(int col) const;
   int getY(int row) const;
   void updateButton();
   void switchTable();
   void pressKey();
+  void pressKey(char keycode);
+  void clearMorse();
+  void pressMorse(bool longTone);
+  void inputMorse();
   void drawKeyTop(int c, int r, int x, int y);
+  void drawMorse(uint16_t m, int x, int y);
   void drawTextbox();
   void drawKeyboard(int h = -1);
   void drawColumn(int col);
