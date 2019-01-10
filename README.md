@@ -14,23 +14,31 @@ M5Stack本体の３ボタンで操作できるオンスクリーンキーボー�
 
 ![image](https://user-images.githubusercontent.com/42724151/50738003-86b17980-1212-11e9-9cbf-319bbd885cd9.png)
   
-in column select mode.  
- Button A click : The focus move to left.  
- Button B click : The focus move to right.  
- Button C click : Switch to the row selection mode.  
- Button A hold and Button B click : Keyboard panel switches.  
- Button A hold and Button C click : Finish keyboard input.  
+in column select mode:  
+ **Button A click** : The focus move to left.  
+ **Button B click** : The focus move to right.  
+ **Button C click** : Switch to the row selection mode.  
+ **Button A hold and Button B click** : Keyboard panel switches.  
+ **Button A hold and Button C click** : Finish keyboard input.  
   
   
-in row select mode.  
- Button A  The focus move to up.  
- Button B  The focus move to down.  
- Button C  The focused key is entered, and Switch to the column selection mode.  
- Button A hold and Button B click : Keyboard panel switches.  
- Button A hold and Button C click : Switch to the column selection mode.  
+in row select mode:  
+ **Button A click** : The focus move to up.  
+ **Button B click** : The focus move to down.  
+ **Button C click** : The focused key is entered, and Switch to the column selection mode.  
+ **Button A hold and Button B click** : Keyboard panel switches.  
+ **Button A hold and Button C click** : Switch to the column selection mode.  
   
   
- Button A hold and Button B hold and Button C click : Morse code mode switches.  
+ **Button A hold and Button B hold and Button C click** : Morse code mode switches.  
+![image](https://user-images.githubusercontent.com/42724151/50976020-47e13380-1532-11e9-96dd-d98f09d665f4.png)
+
+in morse code mode:  
+ **Button B click** : Input a short pulse.   
+ **Button C click** : Input a long pulse.  
+ **Release your hand for 1 second** : Fix input.
+ **Button A hold and Button B click** : Keyboard panel switches.  
+ **Button A hold and Button C click** : Finish keyboard input.  
 
 ## Licence
 
