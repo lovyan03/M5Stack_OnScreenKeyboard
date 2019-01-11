@@ -11,6 +11,12 @@ OnScreenKeyBoard which can be operated with 3 button.
 
 M5Stack本体の３ボタンで操作できるオンスクリーンキーボード。  
 
+Support PLUS Encoder unit.  
+Support JoyStick unit.  
+Support morse code input.  
+
+PLUSエンコーダユニット、ジョイスティックユニットでも操作可能。  
+ABC３ボタン同時押しでモールス入力も使用可能。  
 
 ![image](https://user-images.githubusercontent.com/42724151/50738003-86b17980-1212-11e9-9cbf-319bbd885cd9.png)
   
