@@ -53,10 +53,10 @@ static const PROGMEM uint16_t _morsetbl[2][ROWCOUNT][COLUMNCOUNT]
      , {0x000d, 0x0015, 0x0017, 0x0075, 0x001f, 0x0055, 0x00fd, 0x0037, 0x005d, 0x01d7, LEFT}
      , {0x005f, 0x00d7, 0x0077, 0x00d5, 0x0057, 0x0007, 0x000f, 0x00f5, 0x0ddd, 0x077d, RIGH}
      }
-    , {{0x0f77, 0x075d,  '#'  , 0x35d5,  '%'  , 0x015d, 0x07fd,  '`'  ,  '^'  ,  '~'  , 0x00ff}
-     , { '<'  ,  '>'  , 0x07d5, 0x0fd5,  '{'  ,  '}'  , 0x01f7, 0x0df7, 0x0357, '\\'  ,  DEL}
-     , {0x0df5,  '|'  , 0x0f5f, 0x0d55, 0x057f, 0x05f5, 0x01dd, 0x00d7, 0x0d57, 0x01d7, LEFT}
-     , {0x0ddd, 0x0ddd, 0x0ddd, 0x0ddd, 0x0ddd, 0x0ddd, 0x0ddd, 0x00f5, 0x0ddd, 0x077d, RIGH}
+    , {{0x0f77, 0x075d, 0x01df, 0x05d5, 0x037f, 0x015d, 0x07fd, 0x0dd7, 0x0555, 0x05fd, 0x00ff}
+     , {0x03f7, 0x0ff7, 0x017d, 0x0d7d, 0x037d, 0x0f7d, 0x01f7, 0x0df7, 0x0357, 0x0377,  DEL}
+     , {0x0df5, 0x0ddf, 0x0f5f, 0x0777, 0x057f, 0x05f5, 0x01dd, 0x01d5, 0x0d57, 0x01d7, LEFT}
+     , {     0,      0,      0,      0,      0,      0,      0, 0x00f5, 0x0ddd, 0x077d, RIGH}
     }};
 
 static int numofbits(uint16_t bits)
@@ -269,28 +269,41 @@ void M5OnScreenKeyboard::clearMorse() {
 
 void M5OnScreenKeyboard::pressMorse(bool longTone) {
   _morseInputBuf |= (longTone ? 3 : 1) << (_morsePos*2);
-
+  int tbl = (_nowTbl == 2) ? 1 : 0;
+  bool hit = false;
+  for (int r = 0; r < ROWCOUNT && !hit; ++r) {
+    for (int c = 0; c < COLUMNCOUNT; ++c) {
+      hit = (_morseInputBuf == _morsetbl[tbl][r][c]);
+      if (!hit) continue;
+      _nowRow = r;
+      _nowCol = c;
+      break;
+    }
+  }
   if (++_morsePos > 8) inputMorse();
 }
 
 void M5OnScreenKeyboard::inputMorse() {
-  int tbl1 = (_nowTbl == 2) ? 1 : 0;
-  int tbl2 = tbl1 ? 0 : 1;
+  if (!_morseInputBuf) return;
+  int tbl = (_nowTbl == 2) ? 1 : 0;
 
   uint16_t morse = _morseInputBuf;
   clearMorse();
   for (int c = 0; c < COLUMNCOUNT; ++c) {
     for (int r = 0; r < ROWCOUNT; ++r) {
-      if (morse == _morsetbl[tbl1][r][c]) {
-        pressKey(_chartbl[_nowTbl][r][c]);
-        _nowRow = r;
-        _nowCol = c;
-        return;
-      }
-      if (morse == _morsetbl[tbl2][r][c]) {
-        pressKey(_chartbl[tbl2 ? 2 : 0][r][c]);
-        return;
-      }
+      if (morse != _morsetbl[tbl][r][c]) continue;
+      pressKey(_chartbl[_nowTbl][r][c]);
+      _nowRow = r;
+      _nowCol = c;
+      return;
+    }
+  }
+  tbl = tbl ? 0 : 1;
+  for (int c = 0; c < COLUMNCOUNT; ++c) {
+    for (int r = 0; r < ROWCOUNT; ++r) {
+      if (morse != _morsetbl[tbl][r][c]) continue;
+      pressKey(_chartbl[tbl ? 2 : 0][r][c]);
+      return;
     }
   }
 }
@@ -312,7 +325,7 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y) {
     int mTbl = (_nowTbl == 2) ? 1 : 0;
     int morse = _morsetbl[mTbl][r][c];
     if (morse != 0 && morse != _chartbl[_nowTbl][r][c]) {
-      drawMorse(morse, x + 13 - numofbits(morse), y + moffset);
+      drawMorse(morse, x + 14 - numofbits(morse), y + moffset);
     }
   }
 }
