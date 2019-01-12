@@ -1,6 +1,7 @@
 #include <M5Stack.h>
 #include <M5OnScreenKeyboard.h>
 
+
 M5OnScreenKeyboard m5osk;
 
 void setup() {
@@ -9,6 +10,11 @@ void setup() {
 
 // textbox disabled.
   m5osk.useTextbox = false;
+
+  m5osk.useFACES = true;       // FACES unit support.
+  m5osk.useJoyStick = true;    // JoyStick unit support.
+  m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
+
 }
 void loop() {
   String text;

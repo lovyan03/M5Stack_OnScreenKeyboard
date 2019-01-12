@@ -1,11 +1,16 @@
 #include <M5Stack.h>
 #include <M5OnScreenKeyboard.h>
+//#include <M5JoyStick.h>
 
 M5OnScreenKeyboard m5osk;
 
 void setup() {
   M5.begin();
   Wire.begin();
+
+  m5osk.useFACES = true;       // FACES unit support.
+  m5osk.useJoyStick = true;    // JoyStick unit support.
+  m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
 
 /* // color change example.
   m5osk.fontColor   = 0x0208;
@@ -20,6 +25,11 @@ void setup() {
 /* // response speed change example.
   m5osk.msecHold = 200;
   m5osk.msecRepeat= 100;
+//*/
+
+/* // JoyStick unit rotation setting
+//  need #include <M5JoyStick.h>
+JoyStick.setRotate(0);   // 0~3 rotation setting.
 //*/
 
   m5osk.setup("Hello World.");

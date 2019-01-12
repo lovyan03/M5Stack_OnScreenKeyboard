@@ -21,6 +21,9 @@ public:
   uint8_t maxlength = 52;
 
   bool useTextbox = true;
+  bool useFACES = false;
+  bool useJoyStick = false;
+  bool usePLUSEncoder = false;
 
   void setup(const String& value = "");
   bool loop();

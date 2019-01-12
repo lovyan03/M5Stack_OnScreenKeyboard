@@ -14,8 +14,8 @@ enum
 
 static const char BS   = 0x08;
 static const char DEL  = 0x7f;
-static const char LEFT = 0x1d;
-static const char RIGH = 0x1c;
+static const char LEFT = 0x81;
+static const char RIGH = 0x83;
 
 static const PROGMEM char _chartbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT] 
    = {{{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', BS }
@@ -37,16 +37,9 @@ static const PROGMEM char _chartbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT]
 
 // morse code 1tone:2bit encode ( Start with LSB )
 // 00 none
-// 01 short
-// 11 long
-// 10 nothing
-// е   1 or 4
-// -   3 or c
-// ее  5
-// -е  7
-// е-  d
-// --  f
-// ( SPACE & BACKSPACE morse code conforms to Google input. )
+// 01 я╜е short pulse
+// 11 - long pulse
+// 10 no use
 static const PROGMEM uint16_t _morsetbl[2][ROWCOUNT][COLUMNCOUNT]
    = {{{0x03fd, 0x03f5, 0x03d5, 0x0355, 0x0155, 0x0157, 0x015f, 0x017f, 0x01ff, 0x03ff, 0x00ff}
      , {0x00df, 0x003d, 0x0001, 0x001d, 0x0003, 0x00f7, 0x0035, 0x0005, 0x003f, 0x007d,  DEL}
@@ -152,8 +145,36 @@ bool M5OnScreenKeyboard::loop() {
       break;
     }
   }
+  if (useFACES && Wire.requestFrom(0x08, 1)) {
+    while (Wire.available()){
+      char key = Wire.read();
+      if (key == 0 || key == 0xff) continue;
+      press = true;
+      if (canRepeat) {
+        mod = true;
+        ++_repeat;
+        switch (key) {
+        case 0xbf: { switchTable(); } break;
+        case 0xef: { pressKey();   } break;
+        case 0xdf: key = BS; // FACES GameBoy B btn: BS assign.
+        case BS: case LEFT: case RIGH:
+            pressKey(key);
+            break;
+        default:
+          if (0x20 <= key && key < 0x80) {
+            pressKey(key);
+          } else
+          if (key >= 0xf0) { // FACES GameBoy cursor
+            _nowCol += (0 == (key & 0x08)) ? 1 : (0 == (key & 0x04)) ? -1 : 0;
+            _nowRow += (0 == (key & 0x02)) ? 1 : (0 == (key & 0x01)) ? -1 : 0;
+          }
+          break;
+        }
+      }
+    }
+  }
 #ifdef _M5PLUSENCODER_H_
-  if (PLUSEncoder.update()) {
+  if (usePLUSEncoder && PLUSEncoder.update()) {
     switch (_state) {
     case LEFTRIGHT:   // left right moving
       if (PLUSEncoder.wasUp())       { --_nowCol; }
@@ -171,7 +192,7 @@ bool M5OnScreenKeyboard::loop() {
   }
 #endif
 //#ifndef _M5JOYSTICK_H_
-  if (JoyStick.update()) {
+  if (useJoyStick && JoyStick.update()) {
     if (JoyStick.isLeft() ) { press = true; if (JoyStick.wasLeft()  || canRepeat) { --_nowCol; ++_repeat; } }
     if (JoyStick.isRight()) { press = true; if (JoyStick.wasRight() || canRepeat) { ++_nowCol; ++_repeat; } }
     if (JoyStick.isUp()   ) { press = true; if (JoyStick.wasUp()    || canRepeat) { --_nowRow; ++_repeat; } }
@@ -192,13 +213,13 @@ bool M5OnScreenKeyboard::loop() {
       drawColumn(_nowCol);
       if (_oldCol != _nowCol) drawColumn(_oldCol);
     }
-    _msecNext = _msec + ((canRepeat && 0 < _repeat) ? msecRepeat : msecHold);
+    _msecNext = _msec + ((canRepeat && 1 < _repeat) ? msecRepeat : msecHold);
     _oldCol = _nowCol;
     _oldRow = _nowRow;
   } else {
     if (!press) {
       _repeat = 0;
-      _msecNext = -1;
+      _msecNext = 0;
     }
   }
   return true;
