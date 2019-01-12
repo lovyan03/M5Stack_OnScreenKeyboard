@@ -51,6 +51,27 @@ in morse code mode:
  Morse code is GBoard morse compliant.  
 [GBoard morse code list](https://gist.github.com/natevw/0fce6b56c606632f8ee780b5d493f94e)
 
+## Usage
+
+```
+#include <M5OnScreenKeyboard.h>
+
+M5OnScreenKeyboard m5osk;
+
+  m5osk.useFACES = true;       // FACES unit support.
+  m5osk.useJoyStick = true;    // JoyStick unit support.
+  m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
+
+  m5osk.setup("Hello World."); // default text
+
+  while (m5osk.loop()) {
+    // You can write your code here.
+    delay(1);
+  }
+  String text = m5osk.getString();
+  m5osk.close();
+```
+
 ## Licence
 
 [LGPL v2.1](https://github.com/lovyan03/M5OnScreenKeyBoard/blob/master/LICENSE)  
