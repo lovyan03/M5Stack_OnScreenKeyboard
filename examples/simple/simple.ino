@@ -25,6 +25,7 @@ void setup() {
 /* // response speed change example.
   m5osk.msecHold = 200;
   m5osk.msecRepeat= 100;
+  m5osk.msecMorseInput = 500;
 //*/
 
 /* // JoyStick unit rotation setting

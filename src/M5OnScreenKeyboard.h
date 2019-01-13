@@ -18,6 +18,7 @@ public:
   uint8_t textYOffset = 4;
   uint16_t msecHold = 300;
   uint16_t msecRepeat= 150;
+  uint16_t msecMorseInput = 1000;
   uint8_t maxlength = 52;
 
   bool useTextbox = true;

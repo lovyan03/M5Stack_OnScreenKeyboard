@@ -36,16 +36,16 @@ in row select mode:
  `BtnA hold and BtnB click` : Keyboard panel switches.  
  `BtnA hold and BtnC click` : Switch to the column selection mode.  
   
-  
- `BtnA and B hold and BtnC click` : Morse code mode switches.  
+ `BtnA and B hold and BtnC click` : Switch to the Morse code mode.  
 ![image](https://user-images.githubusercontent.com/42724151/50976020-47e13380-1532-11e9-96dd-d98f09d665f4.png)
 
 in morse code mode:  
+ `BtnA click` : Keyboard panel switches.  
  `BtnB click` : Input a short pulse.   
  `BtnC click` : Input a long pulse.  
  `Release BtnB and C for 1 second` : Fix input.  
- `BtnA hold and BtnB click` : Keyboard panel switches.  
  `BtnA hold and BtnC click` : Finish keyboard input.  
+ `BtnA and B hold and BtnC click` : Switch to the Focus mode.  
 
 
  Morse code is GBoard morse compliant.  

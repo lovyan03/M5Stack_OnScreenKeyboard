@@ -139,9 +139,11 @@ bool M5OnScreenKeyboard::loop() {
       if (M5.BtnC.wasReleased() && 0 < _repeat) { mod = true; _state = LEFTRIGHT; }
       break;
     case MORSE:    // morse input mode.
+      if (M5.BtnA.wasReleased()) { switchTable(); }
       if (M5.BtnB.wasPressed()) { press = true; pressMorse(false); }
       if (M5.BtnC.wasPressed()) { press = true; pressMorse(true ); }
-      if (M5.BtnB.releasedFor(1000) && M5.BtnC.releasedFor(1000) ) { inputMorse(); }
+      if (M5.BtnB.releasedFor(msecMorseInput)
+       && M5.BtnC.releasedFor(msecMorseInput) ) { inputMorse(); }
       break;
     }
   }
@@ -244,9 +246,9 @@ void M5OnScreenKeyboard::updateButton() {
     }
   } else {
     switch (_state) {
-    case LEFTRIGHT: ButtonDrawer.setText("Left/Fn", "Right", "Row"); break;
-    case UPDOWN:    ButtonDrawer.setText("Up/Fn"  , "Down" , "Ok" ); break;
-    case MORSE:     ButtonDrawer.setText("Fn"     , "."    , "_"  ); break;
+    case LEFTRIGHT: ButtonDrawer.setText("Left/Fn" , "Right", "Row"); break;
+    case UPDOWN:    ButtonDrawer.setText("Up/Fn"   , "Down" , "Ok" ); break;
+    case MORSE:     ButtonDrawer.setText("Panel/Fn", "."    , "_"  ); break;
     }
   }
 }
