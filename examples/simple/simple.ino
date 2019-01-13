@@ -33,7 +33,9 @@ void setup() {
 JoyStick.setRotate(0);   // 0~3 rotation setting.
 //*/
 
-  m5osk.setup("Hello World.");
+  m5osk.setup();
+//m5osk.setup("Hello World."); // You can also set default text
+
 }
 void loop() {
 

@@ -18,7 +18,7 @@ public:
   uint8_t textYOffset = 4;
   uint16_t msecHold = 300;
   uint16_t msecRepeat= 150;
-  uint16_t msecMorseInput = 1000;
+  uint16_t msecMorseInput = 700;
   uint8_t maxlength = 52;
 
   bool useTextbox = true;
@@ -31,7 +31,7 @@ public:
   void close();
 
   void draw();
-
+  void clearString();
   String getString() const { return _string; }
   void setString(const String& value = "");
   char getKeyCode() const { return _keyCode; }

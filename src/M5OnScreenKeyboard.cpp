@@ -65,6 +65,11 @@ void M5OnScreenKeyboard::setString(const String& value) {
   _cursorPos = _string.length();
 }
 
+void M5OnScreenKeyboard::clearString() { 
+  _string = "";
+  _cursorPos = 0;
+}
+
 void M5OnScreenKeyboard::setup(const String& value) {
   ButtonDrawer.setText("","","");
   ButtonDrawer.draw();
@@ -96,50 +101,63 @@ bool M5OnScreenKeyboard::loop() {
   int oldRepeat = _repeat;
   M5.update();
 
-  // BtnA Pressing Fn _state
-  if (M5.BtnA.isPressed()) {
-    // 3button simultaneously  switchs morse mode.
-    if (M5.BtnB.isPressed() && M5.BtnC.wasPressed()) {
-      _fn = true;
+  if (M5.BtnA.isPressed() || _fn)
+  { // BtnA Pressing Fn _state
+    if (_fn < 3 && M5.BtnB.isPressed() && M5.BtnC.isPressed())
+    { // 3button simultaneously clear string.
+      _fn = 3;
+      mod = true;
+      clearString();
+      drawTextbox();
+    } else if (_fn < 3 && M5.BtnC.isReleased() && M5.BtnB.wasReleased())
+    { // A + B simultaneously switchs morse mode.
+      _fn = 3;
       mod = true;
       clearMorse();
       _state = (_state == MORSE) 
              ? LEFTRIGHT
              : MORSE;
       drawKeyboard();
-    } else
-    if (M5.BtnB.wasPressed()) {
-      _fn = true;
-      mod = true;
-      switchTable();
-    } else
-    if (M5.BtnC.wasPressed()) {
-      _fn = true;
+    } else if (_fn < 3 && M5.BtnB.isReleased() && M5.BtnC.wasReleased()) {
+      _fn = 3;
       if (_state == LEFTRIGHT || _state == MORSE) {
         return false; 
       }
       mod = true; 
       _state = LEFTRIGHT;
-    } else {
-      _fn |= M5.BtnA.pressedFor(msecHold);
+    } else if (M5.BtnB.isReleased() && M5.BtnC.isReleased()) {
+      if (M5.BtnA.isReleased()) { // AllBtnReleased clear fn mode
+        _fn = 0;
+      } else if (_fn == 3) {
+        _fn = 2;
+      } else if (_fn < 2 && M5.BtnA.pressedFor(msecHold)) {
+        _fn = 1;
+        press = true; 
+        if (canRepeat) {
+          switch (_state) {
+          case LEFTRIGHT: if (++_repeat < COLUMNCOUNT) --_nowCol; break;
+          case UPDOWN:    if (++_repeat < ROWCOUNT)    --_nowRow; break;
+          }
+        }
+      }
+    } else if (!_fn) {
+      if (M5.BtnB.isPressed() || M5.BtnC.isPressed()) {
+        _fn = 1;
+      }
     }
-  } else if (_fn) {
-    if (M5.BtnB.isReleased() && M5.BtnC.isReleased()) _fn = false;
   } else {
+    if (M5.BtnA.wasReleased()) { switchTable(); }
     switch (_state) {
     case LEFTRIGHT:   // left right moving.
-      if (M5.BtnA.wasReleased()) { --_nowCol; }
       if (M5.BtnB.isPressed()) { press = true; if (M5.BtnB.wasPressed() || canRepeat) { if (++_repeat < COLUMNCOUNT) ++_nowCol; } }
       if (M5.BtnC.wasPressed()) { mod = true; _state = UPDOWN; _repeat = -1; }
       break;
     case UPDOWN:    // up down moving.
-      if (M5.BtnA.wasReleased()) { --_nowRow; }
       if (M5.BtnB.isPressed()) { press = true; if (M5.BtnB.wasPressed() || canRepeat) { if (++_repeat < ROWCOUNT) ++_nowRow; } }
       if (M5.BtnC.isPressed()) { press = true; if (M5.BtnC.wasPressed() || canRepeat) { mod = true; ++_repeat; pressKey(); } }
       if (M5.BtnC.wasReleased() && 0 < _repeat) { mod = true; _state = LEFTRIGHT; }
       break;
     case MORSE:    // morse input mode.
-      if (M5.BtnA.wasReleased()) { switchTable(); }
       if (M5.BtnB.wasPressed()) { press = true; pressMorse(false); }
       if (M5.BtnC.wasPressed()) { press = true; pressMorse(true ); }
       if (M5.BtnB.releasedFor(msecMorseInput)
@@ -231,23 +249,24 @@ void M5OnScreenKeyboard::close() {
   int y = getY(-1);
   M5.Lcd.fillRect(0, y, M5.Lcd.width(), M5.Lcd.height() - y, 0);
   _state == APPEAR;
-  _string = "";
+  clearString();
 }
 
 int M5OnScreenKeyboard::getX(int col) const { return col * KEYWIDTH; }
 int M5OnScreenKeyboard::getY(int row) const { return M5.Lcd.height() - bottomOffset - (ROWCOUNT - row) * keyHeight; }
 
 void M5OnScreenKeyboard::updateButton() {
-  if (M5.BtnA.isPressed()) {
+  if (M5.BtnA.isPressed() || _fn) {
     switch (_state) {
-    case LEFTRIGHT: ButtonDrawer.setText(_fn?"Fn":"Left", "Panel", M5.BtnB.isPressed() ? "Morse" : "Finish"); break;
-    case UPDOWN:    ButtonDrawer.setText(_fn?"Fn":"Up"  , "Panel", M5.BtnB.isPressed() ? "Morse" : "Column"); break;
-    case MORSE:     ButtonDrawer.setText(    "Fn"       , "Panel", M5.BtnB.isPressed() ? "Focus" : "Finish"); break;
+    case LEFTRIGHT: ButtonDrawer.setText(_fn==1?"Left":_fn?"Fn":"Panel", "Morse", "Finish"); break;
+    case UPDOWN:    ButtonDrawer.setText(_fn==1?"Up"  :_fn?"Fn":"Panel", "Morse", "Column"); break;
+    case MORSE:     ButtonDrawer.setText("Fn", "Focus", "Finish"); break;
     }
+    if (M5.BtnB.isPressed()) ButtonDrawer.setText(2, "AllClear");
   } else {
     switch (_state) {
-    case LEFTRIGHT: ButtonDrawer.setText("Left/Fn" , "Right", "Row"); break;
-    case UPDOWN:    ButtonDrawer.setText("Up/Fn"   , "Down" , "Ok" ); break;
+    case LEFTRIGHT: ButtonDrawer.setText("Panel/Left" , "Right", "Row"); break;
+    case UPDOWN:    ButtonDrawer.setText("Panel/Up"   , "Down" , "Ok" ); break;
     case MORSE:     ButtonDrawer.setText("Panel/Fn", "."    , "_"  ); break;
     }
   }

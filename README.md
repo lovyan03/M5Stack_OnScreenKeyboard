@@ -16,36 +16,29 @@ Support PLUS Encoder unit.
 Support JoyStick unit.  
 Support morse code input.  
 
-FACESキーボードとゲームボーイ、PLUSエンコーダユニット、ジョイスティックユニットでも操作可能。  
-ABC３ボタン同時押しでモールス入力も使用可能。  
+FACESキーボードとFACESゲームボーイ、PLUSエンコーダユニット、ジョイスティックユニットでの操作も対応。  
+A+B 2ボタン同時押しでモールス入力モードに切替可能。  
 
 ![image](https://user-images.githubusercontent.com/42724151/50738003-86b17980-1212-11e9-9cbf-319bbd885cd9.png)
+
+Common operation:
+ `BtnA and B hold and BtnC click` : 全消去  Clear all strings.  
+ `BtnA hold and BtnB click` : モード切替  Switch between Morse code mode and focus selection mode.
+ `BtnA click` : キーボードパネル切替  Keyboard panel switches.  
   
-in column select mode:  
- `BtnA click` : The focus move to left.  
- `BtnB click` : The focus move to right.  
- `BtnC click` : Switch to the row selection mode.  
- `BtnA hold and BtnB click` : Keyboard panel switches.  
- `BtnA hold and BtnC click` : Finish keyboard input.  
+in focus mode:  
+ `BtnA hold` :  左(上)に移動  The focus moves to the left (or up).  
+ `BtnB click(or hold)` : 右(下)に移動  The focus moves to the right (or down).  
+ `BtnC click(or hold)` : 選択項目を決定し、行/列選択切替  The focused target is entered. Then switch the row / column selection.  
+ `BtnA hold and BtnC click` : 入力完了(または列選択に戻る)  Finish keyboard input. (or back to column selection.)  
   
-  
-in row select mode:  
- `BtnA click` : The focus move to up.  
- `BtnB click` : The focus move to down.  
- `BtnC click` : The focused key is entered, and Switch to the column selection mode.  
- `BtnA hold and BtnB click` : Keyboard panel switches.  
- `BtnA hold and BtnC click` : Switch to the column selection mode.  
-  
- `BtnA and B hold and BtnC click` : Switch to the Morse code mode.  
 ![image](https://user-images.githubusercontent.com/42724151/50976020-47e13380-1532-11e9-96dd-d98f09d665f4.png)
 
 in morse code mode:  
- `BtnA click` : Keyboard panel switches.  
- `BtnB click` : Input a short pulse.   
- `BtnC click` : Input a long pulse.  
- `Release BtnB and C for 1 second` : Fix input.  
- `BtnA hold and BtnC click` : Finish keyboard input.  
- `BtnA and B hold and BtnC click` : Switch to the Focus mode.  
+ `BtnB click` : モールス短音入力 Input a short pulse.   
+ `BtnC click` : モールス長音入力 Input a long pulse.  
+ `Release BtnB and C for 700 msec` : 入力確定  Fix input.  
+ `BtnA hold and BtnC click` : 入力完了  Finish keyboard input.  
 
 
  Morse code is GBoard morse compliant.  
@@ -62,7 +55,8 @@ M5OnScreenKeyboard m5osk;
   m5osk.useJoyStick = true;    // JoyStick unit support.
   m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
 
-  m5osk.setup("Hello World."); // default text
+  m5osk.setup();
+//m5osk.setup("Hello World."); // You can also set default text
 
   while (m5osk.loop()) {
     // You can write your code here.
