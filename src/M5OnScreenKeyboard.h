@@ -22,6 +22,7 @@ public:
   uint8_t maxlength = 52;
 
   bool useTextbox = true;
+  bool useOver0x80Chars = false;
   bool useFACES = false;
   bool useJoyStick = false;
   bool usePLUSEncoder = false;

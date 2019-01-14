@@ -6,7 +6,7 @@
 #include <M5JoyStick.h>
 
 enum 
-{ TABLECOUNT  = 3
+{ TABLECOUNT  = 4
 , ROWCOUNT    = 4
 , COLUMNCOUNT =11
 , KEYWIDTH   = 29
@@ -14,8 +14,8 @@ enum
 
 static const char BS   = 0x08;
 static const char DEL  = 0x7f;
-static const char LEFT = 0x81;
-static const char RIGH = 0x83;
+static const char LEFT = 0x11;
+static const char RIGH = 0x13;
 
 static const PROGMEM char _chartbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT] 
    = {{{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', BS }
@@ -32,10 +32,20 @@ static const PROGMEM char _chartbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT]
      , {'<', '>', '[', ']', '{', '}', '(', ')', '=','\\', DEL}
      , {'_', '|', ',', ';', ':', '?', '+', '*', '-', '/',LEFT}
      , {'.', '.', '.', '.', '.', '.', '.', ' ', '.', '@',RIGH}
+     }
+    , {{0x80, 0x84, 0x88, 0x8c, 0x90, 0x94, 0x98, 0x9c, 0xa0, 0xa4, BS }
+     , {0x81, 0x85, 0x89, 0x8d, 0x91, 0x95, 0x99, 0x9d, 0xa1, 0xa5, DEL}
+     , {0x82, 0x86, 0x8a, 0x8e, 0x92, 0x96, 0x9a, 0x9e, 0xa2, 0xa6, LEFT}
+     , {0x83, 0x87, 0x8b, 0x8f, 0x93, 0x97, 0x9b, 0x9f, 0xa3, 0xa7, RIGH}
     }};
 
-static const PROGMEM uint8_t _morsetbl[2][ROWCOUNT][COLUMNCOUNT] 
+static const PROGMEM uint8_t _morsetbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT] 
    = {{{0x30, 0x38, 0x3c, 0x3e, 0x3f, 0x2f, 0x27, 0x23, 0x21, 0x20, 0x10 }
+     , {0x12, 0x0c, 0x03, 0x0d, 0x02, 0x14, 0x0e, 0x07, 0x08, 0x19, 0}
+     , {0x06, 0x0f, 0x0b, 0x1d, 0x09, 0x1f, 0x18, 0x0a, 0x1b, 0x2d, 0}
+     , {0x13, 0x16, 0x15, 0x1e, 0x17, 0x05, 0x04, 0x1c, 0x6a, 0x65, 0}
+     }
+    , {{0x30, 0x38, 0x3c, 0x3e, 0x3f, 0x2f, 0x27, 0x23, 0x21, 0x20, 0x10 }
      , {0x12, 0x0c, 0x03, 0x0d, 0x02, 0x14, 0x0e, 0x07, 0x08, 0x19, 0}
      , {0x06, 0x0f, 0x0b, 0x1d, 0x09, 0x1f, 0x18, 0x0a, 0x1b, 0x2d, 0}
      , {0x13, 0x16, 0x15, 0x1e, 0x17, 0x05, 0x04, 0x1c, 0x6a, 0x65, 0}
@@ -43,7 +53,12 @@ static const PROGMEM uint8_t _morsetbl[2][ROWCOUNT][COLUMNCOUNT]
     , {{0x54, 0x6d, 0x25, 0x7b, 0x22, 0x37, 0x61 ,0x5a, 0x7f, 0x63, 0x10}
      , {0x28, 0x50, 0x33, 0x66, 0x32, 0x64, 0x29 ,0x52, 0x2e, 0x2a, 0}
      , {0x72, 0x4a, 0x4c, 0x55, 0x47, 0x73, 0x35 ,0x3d, 0x5e, 0x2d, 0}
-     , { 0  , 0   , 0   , 0   , 0   , 0   , 0   , 0x1c, 0x6a, 0x65, 0}
+     , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0x1c, 0x6a, 0x65, 0}
+     }
+    , {{0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0x10}
+     , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0}
+     , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0}
+     , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0}
     }};
 
 static uint8_t calcMorse(uint8_t m)
@@ -176,9 +191,9 @@ bool M5OnScreenKeyboard::loop() {
         case 0xbf: { switchTable(); } break;
         case 0xef: { pressKey();   } break;
         case 0xdf: key = BS; // FACES GameBoy B btn: BS assign.
-        case BS: case LEFT: case RIGH:
-            pressKey(key);
-            break;
+        case 0x81: pressKey(LEFT); break;
+        case 0x83: pressKey(RIGH); break;
+        case BS:   pressKey(key);  break;
         default:
           if (0x20 <= key && key < 0x80) {
             pressKey(key);
@@ -271,7 +286,7 @@ void M5OnScreenKeyboard::updateButton() {
   }
 }
 void M5OnScreenKeyboard::switchTable() {
-  _nowTbl = ++_nowTbl % TABLECOUNT;
+  _nowTbl = ++_nowTbl % (TABLECOUNT - (useOver0x80Chars?0:1));
 }
 
 void M5OnScreenKeyboard::pressKey() {
@@ -309,13 +324,12 @@ void M5OnScreenKeyboard::clearMorse() {
 
 void M5OnScreenKeyboard::pressMorse(bool longTone) {
   _morseInputBuf = (0 == _morseInputBuf ? 2 : (_morseInputBuf << 1)) | (longTone ? 0 : 1);
-  int tbl = (_nowTbl == 2) ? 1 : 0;
   if (_morseInputBuf & 0x80) {
     inputMorse(); 
   } else {
     for (int r = 0; r < ROWCOUNT; ++r) {
       for (int c = 0; c < COLUMNCOUNT; ++c) {
-        if (_morseInputBuf != _morsetbl[tbl][r][c]) continue;
+        if (_morseInputBuf != _morsetbl[_nowTbl][r][c]) continue;
         _nowRow = r;
         _nowCol = c;
         return;
@@ -328,23 +342,23 @@ void M5OnScreenKeyboard::pressMorse(bool longTone) {
 
 void M5OnScreenKeyboard::inputMorse() {
   if (!_morseInputBuf) return;
-  int tbl = (_nowTbl == 2) ? 1 : 0;
 
   uint16_t morse = _morseInputBuf;
   clearMorse();
   for (int c = 0; c < COLUMNCOUNT; ++c) {
     for (int r = 0; r < ROWCOUNT; ++r) {
-      if (morse != _morsetbl[tbl][r][c]) continue;
+      if (morse != _morsetbl[_nowTbl][r][c]) continue;
       pressKey(_chartbl[_nowTbl][r][c]);
       return;
     }
   }
-  tbl = tbl ? 0 : 1;
   for (int c = 0; c < COLUMNCOUNT; ++c) {
     for (int r = 0; r < ROWCOUNT; ++r) {
-      if (morse != _morsetbl[tbl][r][c]) continue;
-      pressKey(_chartbl[tbl ? 2 : 0][r][c]);
-      return;
+      for (int t = 0; t < TABLECOUNT; ++t) {
+        if (morse != _morsetbl[t][r][c]) continue;
+        pressKey(_chartbl[t][r][c]);
+        return;
+      }
     }
   }
   _nowRow = ROWCOUNT-1;
@@ -365,8 +379,7 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y) {
     break;
   }
   if (_state == MORSE) {
-    int mTbl = (_nowTbl == 2) ? 1 : 0;
-    int morse = _morsetbl[mTbl][r][c];
+    int morse = _morsetbl[_nowTbl][r][c];
     if (morse != 0) {
       drawMorse(morse, x + 15 - calcMorse(morse) / 2, y + moffset);
     }

@@ -33,9 +33,12 @@ void setup() {
 JoyStick.setRotate(0);   // 0~3 rotation setting.
 //*/
 
+/* // use non-latin-chars (tentative)
+  m5osk.useOver0x80Chars = true;
+//*/
+
   m5osk.setup();
 //m5osk.setup("Hello World."); // You can also set default text
-
 }
 void loop() {
 
