@@ -34,30 +34,29 @@ static const PROGMEM char _chartbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT]
      , {'.', '.', '.', '.', '.', '.', '.', ' ', '.', '@',RIGH}
     }};
 
-
-// morse code 1tone:2bit encode ( Start with LSB )
-// 00 none
-// 01 ･ short pulse
-// 11 - long pulse
-// 10 no use
-static const PROGMEM uint16_t _morsetbl[2][ROWCOUNT][COLUMNCOUNT]
-   = {{{0x03fd, 0x03f5, 0x03d5, 0x0355, 0x0155, 0x0157, 0x015f, 0x017f, 0x01ff, 0x03ff, 0x00ff}
-     , {0x00df, 0x003d, 0x0001, 0x001d, 0x0003, 0x00f7, 0x0035, 0x0005, 0x003f, 0x007d,  DEL}
-     , {0x000d, 0x0015, 0x0017, 0x0075, 0x001f, 0x0055, 0x00fd, 0x0037, 0x005d, 0x01d7, LEFT}
-     , {0x005f, 0x00d7, 0x0077, 0x00d5, 0x0057, 0x0007, 0x000f, 0x00f5, 0x0ddd, 0x077d, RIGH}
+static const PROGMEM uint8_t _morsetbl[2][ROWCOUNT][COLUMNCOUNT] 
+   = {{{0x30, 0x38, 0x3c, 0x3e, 0x3f, 0x2f, 0x27, 0x23, 0x21, 0x20, 0x10 }
+     , {0x12, 0x0c, 0x03, 0x0d, 0x02, 0x14, 0x0e, 0x07, 0x08, 0x19, 0}
+     , {0x06, 0x0f, 0x0b, 0x1d, 0x09, 0x1f, 0x18, 0x0a, 0x1b, 0x2d, 0}
+     , {0x13, 0x16, 0x15, 0x1e, 0x17, 0x05, 0x04, 0x1c, 0x6a, 0x65, 0}
      }
-    , {{0x0f77, 0x075d, 0x01df, 0x05d5, 0x037f, 0x015d, 0x07fd, 0x0dd7, 0x0555, 0x05fd, 0x00ff}
-     , {0x03f7, 0x0ff7, 0x017d, 0x0d7d, 0x037d, 0x0f7d, 0x01f7, 0x0df7, 0x0357, 0x0377,  DEL}
-     , {0x0df5, 0x0ddf, 0x0f5f, 0x0777, 0x057f, 0x05f5, 0x01dd, 0x01d5, 0x0d57, 0x01d7, LEFT}
-     , {     0,      0,      0,      0,      0,      0,      0, 0x00f5, 0x0ddd, 0x077d, RIGH}
+    , {{0x54, 0x6d, 0x25, 0x7b, 0x22, 0x37, 0x61 ,0x5a, 0x7f, 0x63, 0x10}
+     , {0x28, 0x50, 0x33, 0x66, 0x32, 0x64, 0x29 ,0x52, 0x2e, 0x2a, 0}
+     , {0x72, 0x4a, 0x4c, 0x55, 0x47, 0x73, 0x35 ,0x3d, 0x5e, 0x2d, 0}
+     , { 0  , 0   , 0   , 0   , 0   , 0   , 0   , 0x1c, 0x6a, 0x65, 0}
     }};
 
-static int numofbits(uint16_t bits)
+static uint8_t calcMorse(uint8_t m)
 {
-    bits = (bits & 0x55555555) + (bits >> 1 & 0x55555555);
-    bits = (bits & 0x33333333) + (bits >> 2 & 0x33333333);
-    bits = (bits & 0x0f0f0f0f) + (bits >> 4 & 0x0f0f0f0f);
-    return (bits & 0x00ff00ff) + (bits >> 8 & 0x00ff00ff);
+  uint8_t res = -2;
+  bool startbit = false;
+  bool flg;
+  for (int i = 0; i < 8; ++i) {
+    flg = (m & (0x80 >> i));
+    if (!startbit) startbit = flg;
+    else res += flg ? 3:5;
+  }
+  return res;
 }
 
 void M5OnScreenKeyboard::setString(const String& value) {
@@ -306,13 +305,12 @@ void M5OnScreenKeyboard::pressKey(char keycode) {
 
 void M5OnScreenKeyboard::clearMorse() {
   _morseInputBuf = 0;
-  _morsePos = 0;
 }
 
 void M5OnScreenKeyboard::pressMorse(bool longTone) {
-  _morseInputBuf |= (longTone ? 3 : 1) << (_morsePos*2);
+  _morseInputBuf = (0 == _morseInputBuf ? 2 : (_morseInputBuf << 1)) | (longTone ? 0 : 1);
   int tbl = (_nowTbl == 2) ? 1 : 0;
-  if (++_morsePos > 8) {
+  if (_morseInputBuf & 0x80) {
     inputMorse(); 
   } else {
     for (int r = 0; r < ROWCOUNT; ++r) {
@@ -369,21 +367,24 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y) {
   if (_state == MORSE) {
     int mTbl = (_nowTbl == 2) ? 1 : 0;
     int morse = _morsetbl[mTbl][r][c];
-    if (morse != 0 && morse != _chartbl[_nowTbl][r][c]) {
-      drawMorse(morse, x + 16 - (numofbits(morse & 0x5555) * 3 + numofbits(morse & 0xAAAA) * 2) / 2, y + moffset);
+    if (morse != 0) {
+      drawMorse(morse, x + 15 - calcMorse(morse) / 2, y + moffset);
     }
   }
 }
 
-void M5OnScreenKeyboard::drawMorse(uint16_t m, int x, int y)
+void M5OnScreenKeyboard::drawMorse(uint8_t m, int x, int y)
 {
+  bool startbit = false;
+  bool flg;
   for (int i = 0; i < 8; ++i) {
-    switch (m % 4) {
-    case 1: M5.Lcd.drawFastVLine(x, y-1, 3, fontColor); x += 3; break;
-    case 3: M5.Lcd.drawFastHLine(x, y  , 3, fontColor); x += 5; break;
-    default: return;
+    flg = (m & (0x80 >> i));
+    if (!startbit) startbit = flg;
+    else {
+      if (flg) M5.Lcd.drawFastVLine(x, y-1, 3, fontColor);
+      else     M5.Lcd.drawFastHLine(x, y  , 3, fontColor);
+      x += flg ? 3 : 5;
     }
-    m >>= 2;
   }
 }
 

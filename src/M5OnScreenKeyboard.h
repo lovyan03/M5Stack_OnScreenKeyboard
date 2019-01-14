@@ -56,8 +56,7 @@ private:
   int _repeat;
   char _keyCode;
   String _string;
-  int8_t _morsePos;
-  int16_t _morseInputBuf;
+  uint8_t _morseInputBuf;
 
   int getX(int col) const;
   int getY(int row) const;
@@ -69,7 +68,7 @@ private:
   void pressMorse(bool longTone);
   void inputMorse();
   void drawKeyTop(int c, int r, int x, int y);
-  void drawMorse(uint16_t m, int x, int y);
+  void drawMorse(uint8_t m, int x, int y);
   void drawTextbox();
   void drawKeyboard(int h = -1);
   void drawColumn(int col);
