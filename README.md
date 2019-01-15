@@ -1,4 +1,4 @@
-M5Stack OnScreenKeyBoard library.
+M5Stack OnScreenKeyBoard library. (for ASCII code)
 ===
 
 Add Keyboard for your M5Stack project.
