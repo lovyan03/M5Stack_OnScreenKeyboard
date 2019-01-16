@@ -45,11 +45,6 @@ static const PROGMEM uint8_t _morsetbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT]
      , {0x06, 0x0f, 0x0b, 0x1d, 0x09, 0x1f, 0x18, 0x0a, 0x1b, 0x2d, 0}
      , {0x13, 0x16, 0x15, 0x1e, 0x17, 0x05, 0x04, 0x1c, 0x6a, 0x65, 0}
      }
-    , {{0x30, 0x38, 0x3c, 0x3e, 0x3f, 0x2f, 0x27, 0x23, 0x21, 0x20, 0x10 }
-     , {0x12, 0x0c, 0x03, 0x0d, 0x02, 0x14, 0x0e, 0x07, 0x08, 0x19, 0}
-     , {0x06, 0x0f, 0x0b, 0x1d, 0x09, 0x1f, 0x18, 0x0a, 0x1b, 0x2d, 0}
-     , {0x13, 0x16, 0x15, 0x1e, 0x17, 0x05, 0x04, 0x1c, 0x6a, 0x65, 0}
-     }
     , {{0x54, 0x6d, 0x25, 0x7b, 0x22, 0x37, 0x61 ,0x5a, 0x7f, 0x63, 0x10}
      , {0x28, 0x50, 0x33, 0x66, 0x32, 0x64, 0x29 ,0x52, 0x2e, 0x2a, 0}
      , {0x72, 0x4a, 0x4c, 0x55, 0x47, 0x73, 0x35 ,0x3d, 0x5e, 0x2d, 0}
@@ -60,6 +55,9 @@ static const PROGMEM uint8_t _morsetbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT]
      , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0}
      , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0}
     }};
+
+static const PROGMEM uint8_t _morsepanel[TABLECOUNT] 
+   = {0,0,1,2};
 
 static uint8_t calcMorse(uint8_t m)
 {
@@ -182,28 +180,31 @@ bool M5OnScreenKeyboard::loop() {
   if (useFACES && Wire.requestFrom(0x08, 1)) {
     while (Wire.available()){
       char key = Wire.read();
-      if (key == 0 || key == 0xff) continue;
+      if (key == 0)    { _flgFACESKB = true; continue; }
+      if (key == 0xff) { _flgFACESKB = false; continue; }
       press = true;
       if (canRepeat) {
         mod = true;
         ++_repeat;
-        switch (key) {
-        case 0xbf: { switchTable(); } break;
-        case 0xef: { pressKey();   } break;
-        case 0xdf: key = BS; // FACES GameBoy B btn: BS assign.
-        case 0x81: pressKey(LEFT); break;
-        case 0x83: pressKey(RIGH); break;
-        case BS:   pressKey(key);  break;
-        default:
-          if (0x20 <= key && key < 0x80) {
-            pressKey(key);
-          } else
+        if (_flgFACESKB)  inputKB(key);
+        else {
           if (key >= 0xf0) { // FACES GameBoy cursor
             _nowCol += (0 == (key & 0x08)) ? 1 : (0 == (key & 0x04)) ? -1 : 0;
             _nowRow += (0 == (key & 0x02)) ? 1 : (0 == (key & 0x01)) ? -1 : 0;
           }
-          break;
         }
+      }
+    }
+  }
+  if (useCardKB && Wire.requestFrom(0x5F, 1)) {
+    while (Wire.available()){
+      char key = Wire.read();
+      if (key == 0)  { continue; }
+      press = true;
+      if (canRepeat) {
+        mod = true;
+        ++_repeat;
+        inputKB(key);
       }
     }
   }
@@ -258,7 +259,6 @@ bool M5OnScreenKeyboard::loop() {
   }
   return true;
 }
-
 void M5OnScreenKeyboard::close() { 
   int y = getY(-1);
   M5.Lcd.fillRect(0, y, M5.Lcd.width(), M5.Lcd.height() - y, 0);
@@ -289,6 +289,22 @@ void M5OnScreenKeyboard::switchTable() {
   _nowTbl = ++_nowTbl % (TABLECOUNT - (useOver0x80Chars?0:1));
 }
 
+void M5OnScreenKeyboard::inputKB(char key)
+{
+  switch (key) {
+  case 0xbf: { switchTable(); } break;
+  case 0xef: { pressKey();   } break;
+  case 0xdf: key = BS; // FACES GameBoy B btn: BS assign.
+  case 0x81: pressKey(LEFT); break;
+  case 0x83: pressKey(RIGH); break;
+  case BS:   pressKey(key);  break;
+  default:
+    if (0x20 <= key && key < 0x80) {
+      pressKey(key);
+    }
+    break;
+  }
+}
 void M5OnScreenKeyboard::pressKey() {
   pressKey(_chartbl[_nowTbl][_nowRow][_nowCol]);
 }
@@ -327,9 +343,10 @@ void M5OnScreenKeyboard::pressMorse(bool longTone) {
   if (_morseInputBuf & 0x80) {
     inputMorse(); 
   } else {
+    int mp = _morsepanel[_nowTbl];
     for (int r = 0; r < ROWCOUNT; ++r) {
       for (int c = 0; c < COLUMNCOUNT; ++c) {
-        if (_morseInputBuf != _morsetbl[_nowTbl][r][c]) continue;
+        if (_morseInputBuf != _morsetbl[mp][r][c]) continue;
         _nowRow = r;
         _nowCol = c;
         return;
@@ -345,17 +362,21 @@ void M5OnScreenKeyboard::inputMorse() {
 
   uint16_t morse = _morseInputBuf;
   clearMorse();
+  int mp = _morsepanel[_nowTbl];
   for (int c = 0; c < COLUMNCOUNT; ++c) {
     for (int r = 0; r < ROWCOUNT; ++r) {
-      if (morse != _morsetbl[_nowTbl][r][c]) continue;
+      if (morse != _morsetbl[mp][r][c]) continue;
       pressKey(_chartbl[_nowTbl][r][c]);
       return;
     }
   }
   for (int c = 0; c < COLUMNCOUNT; ++c) {
     for (int r = 0; r < ROWCOUNT; ++r) {
+      int m = -1;
       for (int t = 0; t < TABLECOUNT; ++t) {
-        if (morse != _morsetbl[t][r][c]) continue;
+        if (m == _morsepanel[t] || mp == _morsepanel[t]) continue;
+        m = _morsepanel[t];
+        if (morse != _morsetbl[m][r][c]) continue;
         pressKey(_chartbl[t][r][c]);
         return;
       }
@@ -379,7 +400,7 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y) {
     break;
   }
   if (_state == MORSE) {
-    int morse = _morsetbl[_nowTbl][r][c];
+    int morse = _morsetbl[_morsepanel[_nowTbl]][r][c];
     if (morse != 0) {
       drawMorse(morse, x + 15 - calcMorse(morse) / 2, y + moffset);
     }

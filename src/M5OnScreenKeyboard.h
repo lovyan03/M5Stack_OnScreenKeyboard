@@ -6,6 +6,13 @@
 class M5OnScreenKeyboard
 {
 public:
+  bool useTextbox = true;
+  bool useOver0x80Chars = false;
+  bool useFACES = false;
+  bool useCardKB = false;
+  bool useJoyStick = false;
+  bool usePLUSEncoder = false;
+
   uint16_t fontColor   = 0xFFFF;
   uint16_t backColor   = 0x630C;
   uint16_t frameColor  = 0x0208;
@@ -13,19 +20,15 @@ public:
   uint16_t focusBackColor = 0x421F;
   uint16_t textboxFontColor = 0x0000;
   uint16_t textboxBackColor = 0xFFFF;
-  uint8_t bottomOffset = 14;
-  uint8_t keyHeight = 14;
-  uint8_t textYOffset = 4;
+
   uint16_t msecHold = 300;
   uint16_t msecRepeat= 150;
   uint16_t msecMorseInput = 700;
   uint8_t maxlength = 52;
 
-  bool useTextbox = true;
-  bool useOver0x80Chars = false;
-  bool useFACES = false;
-  bool useJoyStick = false;
-  bool usePLUSEncoder = false;
+  uint8_t bottomOffset = 14;
+  uint8_t keyHeight = 14;
+  uint8_t textYOffset = 4;
 
   void setup(const String& value = "");
   bool loop();
@@ -58,11 +61,13 @@ private:
   char _keyCode;
   String _string;
   uint8_t _morseInputBuf;
+  bool _flgFACESKB;
 
   int getX(int col) const;
   int getY(int row) const;
   void updateButton();
   void switchTable();
+  void inputKB(char key);
   void pressKey();
   void pressKey(char keycode);
   void clearMorse();
