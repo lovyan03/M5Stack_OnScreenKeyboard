@@ -186,8 +186,12 @@ bool M5OnScreenKeyboard::loop() {
       if (canRepeat) {
         mod = true;
         ++_repeat;
-        if (_flgFACESKB)  inputKB(key);
-        else {
+        if (_flgFACESKB) {
+          inputKB(key);
+        } else {
+          if (!(key & 0x40)) { switchTable(); }
+          if (!(key & 0x10)) { pressKey();   }
+          if (!(key & 0x20)) { pressKey(BS); } // FACES GameBoy B btn: BS assign.
           if (key >= 0xf0) { // FACES GameBoy cursor
             _nowCol += (0 == (key & 0x08)) ? 1 : (0 == (key & 0x04)) ? -1 : 0;
             _nowRow += (0 == (key & 0x02)) ? 1 : (0 == (key & 0x01)) ? -1 : 0;
@@ -292,9 +296,6 @@ void M5OnScreenKeyboard::switchTable() {
 void M5OnScreenKeyboard::inputKB(char key)
 {
   switch (key) {
-  case 0xbf: { switchTable(); } break;
-  case 0xef: { pressKey();   } break;
-  case 0xdf: key = BS; // FACES GameBoy B btn: BS assign.
   case 0x81: pressKey(LEFT); break;
   case 0x83: pressKey(RIGH); break;
   case BS:   pressKey(key);  break;
