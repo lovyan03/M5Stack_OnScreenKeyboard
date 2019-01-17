@@ -3,20 +3,22 @@ M5Stack OnScreenKeyBoard library. (for ASCII code)
 
 Add Keyboard for your M5Stack project.
 
-あなたのM5Stackプロジェクトにキーボードを！
+あなたのM5Stackプロジェクトにキーボードを！  
 
 ## Description
 
 OnScreenKeyBoard which can be operated with 3 button.  
 
 M5Stack本体の３ボタンで操作できるオンスクリーンキーボード。  
+簡単な文字入力にお使いいただけます。  
 
 Support FACES KeyBoard and GameBoy unit.  
 Support PLUS Encoder unit.  
 Support JoyStick unit.  
+Support CardKB unit.  
 Support morse code input.  
 
-FACESキーボードとFACESゲームボーイ、PLUSエンコーダユニット、ジョイスティックユニットでの操作も対応。  
+M5Stackの各種ユニットでの操作にも対応。
 A+B 2ボタン同時押しでモールス入力モードに切替可能。  
 
 ![image](https://user-images.githubusercontent.com/42724151/51086637-4d39ba80-178c-11e9-9bba-577b2cbabb12.png)
