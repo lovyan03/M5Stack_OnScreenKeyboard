@@ -48,12 +48,9 @@ private:
   };
   eState _state;
   int8_t _fn = 0;
-  int8_t _nowTbl = 0;
-  int8_t _nowCol = 0;
-  int8_t _nowRow = 0;
-  int8_t _oldTbl = 0;
-  int8_t _oldCol = 0;
-  int8_t _oldRow = 0;
+  int8_t _tbl = 0;
+  int8_t _col = 0;
+  int8_t _row = 0;
   int8_t _cursorPos = 0;
   uint32_t _msec = 0;
   uint32_t _msecNext = 0;
@@ -74,7 +71,7 @@ private:
   void pressMorse(bool longTone);
   void inputMorse();
   void drawKeyTop(int c, int r, int x, int y);
-  void drawMorse(uint8_t m, int x, int y);
+  void drawMorse(uint8_t m, int x, int y, uint16_t color);
   void drawTextbox();
   void drawKeyboard(int h = -1);
   void drawColumn(int col);

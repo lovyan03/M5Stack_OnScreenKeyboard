@@ -9,18 +9,18 @@ void setup() {
   Wire.begin();
 
   m5osk.useFACES = true;       // FACES unit support.
-  m5osk.useCardKB = true;      // CARDKB unit support.
+  m5osk.useCardKB = true;      // CardKB unit support.
   m5osk.useJoyStick = true;    // JoyStick unit support.
   m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
 
 /* // color change example.
-  m5osk.fontColor   = 0x0208;
+  m5osk.fontColor   = 0x0A08;
   m5osk.backColor   = 0xFFFF;
   m5osk.frameColor  = 0x0208;
   m5osk.focusFontColor = 0xFFFF;
   m5osk.focusBackColor = 0x4210;
   m5osk.textboxFontColor = 0xFFFF;
-  m5osk.textboxBackColor = 0xC618;
+  m5osk.textboxBackColor = 0x8410;
 //*/
 
 /* // response speed change example.
