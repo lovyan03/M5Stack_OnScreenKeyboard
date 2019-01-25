@@ -96,8 +96,7 @@ void M5OnScreenKeyboard::setup(const String& value) {
 
 bool M5OnScreenKeyboard::loop() {
   _keyCode = 0;
-  M5.Lcd.setTextFont(0);
-  M5.Lcd.setTextSize(0);
+  M5.Lcd.setTextSize(1);
   if (_state == APPEAR && !appear()) return true;
 
   _msec = millis();
@@ -396,20 +395,18 @@ void M5OnScreenKeyboard::inputMorse() {
 }
 
 void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y) {
+  char tbl[2] = {_chartbl[_tbl][r][c],0};
+  char* str = tbl;
+  switch (_chartbl[_tbl][r][c]) {
+  case BS  :  str = "<B S";  break;
+  case DEL :  str = "DEL>";  break;
+  case LEFT:  str = "<<";  break;
+  case RIGH:  str = ">>";  break;
+  }
   int moffset = _state == MORSE ? 2 : 0;
   uint16_t color = (_col == c && _row == r ? focusFontColor : fontColor);
   M5.Lcd.setTextColor(color);
-  M5.Lcd.setCursor(x, y + textYOffset + moffset);
-  switch (_chartbl[_tbl][r][c]) {
-  case BS  :  M5.Lcd.print("<B S ");  break;
-  case DEL :  M5.Lcd.print(" DEL>");  break;
-  case LEFT:  M5.Lcd.print(" <<  ");  break;
-  case RIGH:  M5.Lcd.print("  >> ");  break;
-  default:
-    M5.Lcd.setCursor(x + 13, y + textYOffset + moffset);
-    M5.Lcd.print(_chartbl[_tbl][r][c]);
-    break;
-  }
+  M5.Lcd.drawCentreString(str, x + 16, y + textYOffset + moffset, 1);
   if (_state == MORSE) {
     int morse = _morsetbl[_morsepanel[_tbl]][r][c];
     if (morse != 0) {
@@ -434,19 +431,17 @@ void M5OnScreenKeyboard::drawMorse(uint8_t m, int x, int y, uint16_t color)
 }
 
 void M5OnScreenKeyboard::draw() {
-  M5.Lcd.setTextFont(0);
-  M5.Lcd.setTextSize(0);
+  M5.Lcd.setTextSize(1);
   drawKeyboard();
   if (useTextbox) drawTextbox();
 }
 
 void M5OnScreenKeyboard::drawTextbox() {
-  M5.Lcd.setTextColor(textboxFontColor);
   int y = getY(-1);
-  M5.Lcd.setCursor(1, y + textYOffset);
+  M5.Lcd.setTextColor(textboxFontColor);
   M5.Lcd.drawFastHLine(0, y, M5.Lcd.width(), frameColor);
   M5.Lcd.fillRect(0, y + 1, M5.Lcd.width(), keyHeight - 1, textboxBackColor);
-  M5.Lcd.print(_string);
+  M5.Lcd.drawString(_string, 1, y + textYOffset, 1);
 }
 
 void M5OnScreenKeyboard::drawKeyboard(int h) {

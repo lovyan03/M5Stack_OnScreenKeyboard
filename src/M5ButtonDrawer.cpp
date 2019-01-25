@@ -20,11 +20,12 @@ void M5ButtonDrawer::draw() const
 
 void M5ButtonDrawer::draw(uint8_t index, bool pressed) const
 {
-  draw(index * 96 + 32, pressed, _titles[index]);
+  draw(index * 96 + 64, pressed, _titles[index]);
 }
 
 void M5ButtonDrawer::draw(uint16_t rx, bool pressed, const String& title) const
 {
+  rx -= width / 2;
   uint16_t ry = M5.Lcd.height() - height;
   uint16_t rw = width;
   uint16_t rh = height;
@@ -36,7 +37,7 @@ void M5ButtonDrawer::draw(uint16_t rx, bool pressed, const String& title) const
   rw-=4;
   rh-=4;
   uint16_t h = (rh - 8)/2;
-  uint16_t w = title.length() * 6;
+  uint16_t w = M5.Lcd.textWidth(title, 1);
   uint16_t x = (rw - w) / 2;
   color = backColor[pressed];
   M5.Lcd.fillRect(rx    , ry, x, rh, color);
@@ -45,10 +46,8 @@ void M5ButtonDrawer::draw(uint16_t rx, bool pressed, const String& title) const
     M5.Lcd.fillRect(rx+x, ry,       w, h, color);
     M5.Lcd.fillRect(rx+x, ry+rh-h, w, h, color);
   }
-  M5.Lcd.setCursor(rx+x, ry + h);
-  M5.Lcd.setTextFont(0);
   M5.Lcd.setTextSize(1);
   M5.Lcd.setTextColor(fontColor[pressed], color);
-  M5.Lcd.print(title);
+  M5.Lcd.drawString(title, rx+x, ry+h, 1);
 }
 
