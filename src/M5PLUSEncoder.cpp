@@ -4,7 +4,7 @@ M5PLUSEncoder PLUSEncoder;
 
 bool M5PLUSEncoder::update()
 {
-  if (!Wire.requestFrom(0x62, 2)) return false;
+  if (!Wire.requestFrom(_addr, 2)) return false;
   _time = millis();
   _oldUpDown = _upDown;
   _oldPress = _press;

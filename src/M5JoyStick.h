@@ -8,12 +8,14 @@ class M5JoyStick
 public:
   uint16_t msecHold = 300;
 
+  void setAddr(int8_t addr) { _addr = addr; }
   void setRotate(int rotate) { _rotate = rotate; }
 
   bool update();
 
   uint8_t rawX() const { return _x; }
   uint8_t rawY() const { return _y; }
+  bool isNeutral()   const { return -2 < _upDown && _upDown < 2 && -2 < _leftRight && _leftRight < 2; }
   bool isUp()        const { return -2 == _upDown; }
   bool isDown()      const { return  2 == _upDown; }
   bool isLeft()      const { return  2 == _leftRight; }
@@ -35,6 +37,7 @@ public:
   bool releasedFor(uint32_t ms) const { return (!_press && _time - _lastChange >= ms); }
 
 private:
+  int8_t _addr = 0x52;
   uint8_t _x = 0;
   uint8_t _y = 0;
   uint8_t _rotate = 0;

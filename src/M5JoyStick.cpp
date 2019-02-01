@@ -6,7 +6,7 @@ static int ValueConv(int v) { return (v < 48) ? -2 : (v < 64) ? -1 : (v > 207) ?
 
 bool M5JoyStick::update()
 {
-  if (!Wire.requestFrom(0x52,3)) return false;
+  if (!Wire.requestFrom(_addr,3)) return false;
   _time = millis();
   _oldPress = _press;
   _oldUpDown = _upDown;

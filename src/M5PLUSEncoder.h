@@ -8,6 +8,8 @@ class M5PLUSEncoder
 public:
   uint16_t msecHold = 300;
 
+  void setAddr(int8_t addr) { _addr = addr; }
+
   bool update();
 
   int8_t rawValue() const { return _raw; }
@@ -26,6 +28,7 @@ public:
   bool releasedFor(uint32_t ms) const { return (!_press && _time - _lastChange >= ms); }
 
 private:
+  int8_t _addr = 0x62;
   int8_t _raw = 0;
   int8_t _rawsum = 0;
   int8_t _upDown = 0;
