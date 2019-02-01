@@ -1,7 +1,5 @@
 #include <M5OnScreenKeyboard.h>
-#include <M5Stack.h>
 
-#include <M5ButtonDrawer.h>
 #include <M5PLUSEncoder.h>
 #include <M5JoyStick.h>
 
@@ -83,8 +81,8 @@ void M5OnScreenKeyboard::clearString() {
 }
 
 void M5OnScreenKeyboard::setup(const String& value) {
-  ButtonDrawer.setText("","","");
-  ButtonDrawer.draw();
+  _btnDrawer.setText("","","");
+  _btnDrawer.draw();
   setString(value);
   _tbl = 0;
   _col = 0;
@@ -128,6 +126,7 @@ bool M5OnScreenKeyboard::loop() {
       _fn = 3;
       if (_state == LEFTRIGHT || _state == MORSE)
       { // A + C simultaneously: finish input.
+        while (M5.BtnA.isPressed()) M5.update();
         return false; 
       }
       _state = LEFTRIGHT;
@@ -157,12 +156,12 @@ bool M5OnScreenKeyboard::loop() {
     press |= btnB || btnC;
     switch (_state) {
     case LEFTRIGHT:   // left right moving.
-      if (M5.BtnB.wasPressed() || (btnB && canRepeat)) { if (++_repeat < COLUMNCOUNT) ++_col; }
+      if (btnB && canRepeat) { if (++_repeat < COLUMNCOUNT) ++_col; }
       if (M5.BtnC.wasPressed()) { _state = UPDOWN; _repeat = 0; }
       break;
     case UPDOWN:    // up down moving.
-      if (M5.BtnB.wasPressed() || (btnB && canRepeat)) { if (++_repeat < ROWCOUNT) ++_row; }
-      if (M5.BtnC.wasPressed() || (btnC && canRepeat)) { ++_repeat; pressKey(); }
+      if (btnB && canRepeat) { if (++_repeat < ROWCOUNT) ++_row; }
+      if (btnC && canRepeat) { ++_repeat; pressKey(); }
       if (M5.BtnC.wasReleased() && 0 < _repeat) { _state = LEFTRIGHT; }
       break;
     case MORSE:    // morse input mode.
@@ -224,16 +223,22 @@ bool M5OnScreenKeyboard::loop() {
 #endif
 //#ifndef _M5JOYSTICK_H_
   if (useJoyStick && JoyStick.update()) {
-    if (JoyStick.isLeft() ) { press = true; if (JoyStick.wasLeft()  || canRepeat) { --_col; ++_repeat; } }
-    if (JoyStick.isRight()) { press = true; if (JoyStick.wasRight() || canRepeat) { ++_col; ++_repeat; } }
-    if (JoyStick.isUp()   ) { press = true; if (JoyStick.wasUp()    || canRepeat) { --_row; ++_repeat; } }
-    if (JoyStick.isDown() ) { press = true; if (JoyStick.wasDown()  || canRepeat) { ++_row; ++_repeat; } }
+    if (!JoyStick.isNeutral()) {
+      press = true;
+      if (canRepeat) {
+        ++_repeat;
+        if (JoyStick.isLeft() ) { --_col; }
+        if (JoyStick.isRight()) { ++_col; }
+        if (JoyStick.isUp()   ) { --_row; }
+        if (JoyStick.isDown() ) { ++_row; }
+      }
+    }
     if (JoyStick.wasClicked()) { pressKey(); }
     if (JoyStick.wasHold()) { switchTable(); }
   }
 //#endif
   updateButton();
-  ButtonDrawer.draw();
+  _btnDrawer.draw();
   if (oldCol != _col
    || oldRow != _row
    || oldTbl != _tbl
@@ -273,16 +278,16 @@ int M5OnScreenKeyboard::getY(int row) const { return M5.Lcd.height() - bottomOff
 void M5OnScreenKeyboard::updateButton() {
   if (M5.BtnA.isPressed() || _fn) {
     switch (_state) {
-    case LEFTRIGHT: ButtonDrawer.setText(_fn==1?"Left":_fn?"Fn":"Panel", "Morse", "Finish"); break;
-    case UPDOWN:    ButtonDrawer.setText(_fn==1?"Up"  :_fn?"Fn":"Panel", "Morse", "Column"); break;
-    case MORSE:     ButtonDrawer.setText("Fn", "Focus", "Finish"); break;
+    case LEFTRIGHT: _btnDrawer.setText(_fn==1?"Left":_fn?"Fn":"Panel", "Morse", "Finish"); break;
+    case UPDOWN:    _btnDrawer.setText(_fn==1?"Up"  :_fn?"Fn":"Panel", "Morse", "Column"); break;
+    case MORSE:     _btnDrawer.setText("Fn", "Focus", "Finish"); break;
     }
-    if (M5.BtnB.isPressed()) ButtonDrawer.setText(2, "AllClear");
+    if (M5.BtnB.isPressed()) _btnDrawer.setText(2, "AllClear");
   } else {
     switch (_state) {
-    case LEFTRIGHT: ButtonDrawer.setText("Panel/Left" , "Right", "Row"); break;
-    case UPDOWN:    ButtonDrawer.setText("Panel/Up"   , "Down" , "Ok" ); break;
-    case MORSE:     ButtonDrawer.setText("Panel/Fn", "."    , "_"  ); break;
+    case LEFTRIGHT: _btnDrawer.setText("Panel/Left" , "Right", "Row"); break;
+    case UPDOWN:    _btnDrawer.setText("Panel/Up"   , "Down" , "Ok" ); break;
+    case MORSE:     _btnDrawer.setText("Panel/Fn", "."    , "_"  ); break;
     }
   }
 }

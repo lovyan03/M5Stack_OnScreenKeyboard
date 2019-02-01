@@ -1,7 +1,5 @@
 #include <M5ButtonDrawer.h>
 
-M5ButtonDrawer ButtonDrawer;
-
 void M5ButtonDrawer::setText(const String& btnA, const String& btnB, const String& btnC) {
   _titles[0] = btnA;
   _titles[1] = btnB;

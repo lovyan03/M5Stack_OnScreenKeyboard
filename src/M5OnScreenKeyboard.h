@@ -2,6 +2,7 @@
 #define _M5ONSCREENKEYBOARD_H_
 
 #include <M5Stack.h>
+#include <M5ButtonDrawer.h>
 
 class M5OnScreenKeyboard
 {
@@ -59,6 +60,7 @@ private:
   String _string;
   uint8_t _morseInputBuf;
   bool _flgFACESKB;
+  M5ButtonDrawer _btnDrawer;
 
   int getX(int col) const;
   int getY(int row) const;
