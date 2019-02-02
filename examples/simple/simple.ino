@@ -1,26 +1,38 @@
 #include <M5Stack.h>
 #include <M5OnScreenKeyboard.h>
 //#include <M5JoyStick.h>
+#include <M5ButtonDrawer.h>
 
 M5OnScreenKeyboard m5osk;
 
 void setup() {
   M5.begin();
   Wire.begin();
-
+ 
   m5osk.useFACES = true;       // FACES unit support.
   m5osk.useCardKB = true;      // CardKB unit support.
   m5osk.useJoyStick = true;    // JoyStick unit support.
   m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
 
-/* // color change example.
-  m5osk.fontColor   = 0x0A08;
-  m5osk.backColor   = 0xFFFF;
-  m5osk.frameColor  = 0x0208;
-  m5osk.focusFontColor = 0xFFFF;
-  m5osk.focusBackColor = 0x4210;
+/*
+ // style change example.
+  m5osk.fontColor[0] = 0x0000;
+  m5osk.fontColor[1] = 0xFFFF;
+  m5osk.backColor[0] = 0xF79E;
+  m5osk.backColor[1] = 0x8410;
+  m5osk.frameColor[0]  = 0x4208;
+  m5osk.frameColor[1]  = 0xFFFF;
   m5osk.textboxFontColor = 0xFFFF;
   m5osk.textboxBackColor = 0x8410;
+  m5osk.font = 2;
+
+  M5ButtonDrawer::fontColor[0] = 0xFFFF;
+  M5ButtonDrawer::fontColor[1] = 0x0000;
+  M5ButtonDrawer::backColor[0] = 0x0010;
+  M5ButtonDrawer::backColor[1] = 0xF79E;
+  M5ButtonDrawer::width = 90;
+  M5ButtonDrawer::height = 20;
+  M5ButtonDrawer::font = 2;
 //*/
 
 /* // response speed change example.

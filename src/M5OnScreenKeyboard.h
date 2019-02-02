@@ -14,11 +14,9 @@ public:
   bool useJoyStick = false;
   bool usePLUSEncoder = false;
 
-  uint16_t fontColor   = 0xFFFF;
-  uint16_t backColor   = 0x630C;
-  uint16_t frameColor  = 0x0208;
-  uint16_t focusFontColor = 0xFFFF;
-  uint16_t focusBackColor = 0x421F;
+  uint16_t fontColor[2]   = {0xFFFF, 0xFFFF};
+  uint16_t backColor[2]   = {0x630C, 0x421F};
+  uint16_t frameColor[2]  = {0x0208, 0xFFFF};
   uint16_t textboxFontColor = 0x0000;
   uint16_t textboxBackColor = 0xFFFF;
 
@@ -27,9 +25,8 @@ public:
   uint16_t msecMorseInput = 700;
   uint8_t maxlength = 52;
 
-  uint8_t bottomOffset = 14;
+  int16_t font = 1;
   uint8_t keyHeight = 14;
-  uint8_t textYOffset = 4;
 
   void setup(const String& value = "");
   bool loop();
@@ -57,6 +54,7 @@ private:
   uint32_t _msecNext = 0;
   int _repeat;
   char _keyCode;
+  char _pressed;
   String _string;
   uint8_t _morseInputBuf;
   bool _flgFACESKB;
@@ -72,7 +70,7 @@ private:
   void clearMorse();
   void pressMorse(bool longTone);
   void inputMorse();
-  void drawKeyTop(int c, int r, int x, int y);
+  void drawKeyTop(int c, int r, int x, int y, int keyh);
   void drawMorse(uint8_t m, int x, int y, uint16_t color);
   void drawTextbox();
   void drawKeyboard(int h = -1);
