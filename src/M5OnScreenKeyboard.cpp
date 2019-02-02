@@ -217,7 +217,7 @@ bool M5OnScreenKeyboard::loop() {
       if (PLUSEncoder.wasUp())       { --_row; }
       if (PLUSEncoder.wasDown())     { ++_row; }
       if (PLUSEncoder.wasHold())     { _state = LEFTRIGHT; }
-      if (PLUSEncoder.wasClicked())  { pressKey(); _state = LEFTRIGHT; }
+      if (PLUSEncoder.wasClicked())  { ++_repeat; pressKey(); _state = LEFTRIGHT; }
       break;
     }
   }
@@ -234,7 +234,7 @@ bool M5OnScreenKeyboard::loop() {
         if (JoyStick.isDown() ) { ++_row; }
       }
     }
-    if (JoyStick.wasClicked()) { pressKey(); }
+    if (JoyStick.wasClicked()) { ++_repeat; pressKey(); }
     if (JoyStick.wasHold()) { switchTable(); }
   }
 //#endif
