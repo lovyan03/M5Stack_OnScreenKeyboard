@@ -51,7 +51,7 @@ private:
   int8_t _row = 0;
   int8_t _cursorPos = 0;
   uint32_t _msec = 0;
-  uint32_t _msecNext = 0;
+  uint32_t _msecLast = 0;
   int _repeat;
   char _keyCode;
   char _pressed;

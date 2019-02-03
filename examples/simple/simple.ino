@@ -24,6 +24,7 @@ void setup() {
   m5osk.frameColor[1]  = 0xFFFF;
   m5osk.textboxFontColor = 0xFFFF;
   m5osk.textboxBackColor = 0x8410;
+  m5osk.keyHeight = 20;
   m5osk.font = 2;
 
   M5ButtonDrawer::fontColor[0] = 0xFFFF;

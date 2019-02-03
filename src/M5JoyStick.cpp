@@ -37,17 +37,19 @@ bool M5JoyStick::update()
     if (_oldUpDown    == (_upDown    * 2))  _upDown    = _oldUpDown;
     if (_oldLeftRight == (_leftRight * 2))  _leftRight = _oldLeftRight;
   }
-  if (press != _oldPress) _lastChange = _time;
+  if (press != _oldPress) _lastPressedChange = _time;
   if (press) {
     if (!_oldPress) {
       _press = 1;
     } else 
-    if (1 == _oldPress && (_time - _lastChange >= msecHold)) {
+    if (1 == _oldPress && (_time - _lastPressedChange >= msecHold)) {
       _press = 2;
     }
   } else {
     _press = 0;
   }
+
+  if (_oldUpDown != _upDown || _oldLeftRight != _leftRight) _lastDirectionChange = _time;
 
   return true;
 }

@@ -88,7 +88,7 @@ void M5OnScreenKeyboard::setup(const String& value) {
   _col = 0;
   _row = 0;
   _state = APPEAR;
-  _msecNext = 0;
+  _msecLast = 0;
   _msec = millis();
 }
 
@@ -105,7 +105,8 @@ bool M5OnScreenKeyboard::loop() {
   int8_t oldCol = _col;
   int8_t oldRow = _row;
   int oldRepeat = _repeat;
-  bool canRepeat = (_msec >= _msecNext);
+  bool canRepeat = _repeat == 0 || (_msec - _msecLast) >= (1 < _repeat ? msecRepeat : msecHold);
+
   bool press = false;
 
   if (M5.BtnA.isPressed() || _fn)
@@ -157,7 +158,7 @@ bool M5OnScreenKeyboard::loop() {
     switch (_state) {
     case LEFTRIGHT:   // left right moving.
       if (btnB && canRepeat) { if (++_repeat < COLUMNCOUNT) ++_col; }
-      if (M5.BtnC.wasPressed()) { _state = UPDOWN; _repeat = 0; }
+      if (M5.BtnC.wasReleased()) { _state = UPDOWN; _repeat = 0; }
       break;
     case UPDOWN:    // up down moving.
       if (btnB && canRepeat) { if (++_repeat < ROWCOUNT) ++_row; }
@@ -254,12 +255,11 @@ bool M5OnScreenKeyboard::loop() {
       drawColumn(_col);
       if (oldCol != _col) drawColumn(oldCol);
     }
-    _msecNext = _msec + ((canRepeat && 1 < _repeat) ? msecRepeat : msecHold);
+    _msecLast = _msec;
   } else {
     if (!press) {
-      _msecNext = 0;
       _repeat = 0;
-      if (_pressed) { 
+      if (_pressed != 0 && (_msec - _msecLast) >= msecHold) {
         _pressed = 0;
         drawColumn(_col);
       }
@@ -438,7 +438,7 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y, int kh)
   case RIGH:  str = ">>";  break;
   }
   uint16_t color = fontColor[_col == c && _row == r ? 1 : 0];
-  int fy = min(y + (kh - fh) / 2 + moffset, M5.Lcd.height() - M5ButtonDrawer::height - fh);
+  int fy = min(y + (kh - fh + 1) / 2 + moffset, M5.Lcd.height() - M5ButtonDrawer::height - fh);
   M5.Lcd.setTextColor(color);
   M5.Lcd.drawCentreString(str, x + 16, fy, font);
   if (_state == MORSE) {
@@ -449,6 +449,7 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y, int kh)
   }
   if (_pressed == code) {
     M5.Lcd.drawRect(x+1, y+1, KEYWIDTH - 2, keyHeight - 1, frameColor[1]);
+    _pressed = -1;
   }
 }
 
