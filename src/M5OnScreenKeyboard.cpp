@@ -3,6 +3,27 @@
 #include <M5PLUSEncoder.h>
 #include <M5JoyStick.h>
 
+bool M5OnScreenKeyboard::useTextbox = true;
+bool M5OnScreenKeyboard::useOver0x80Chars = false;
+bool M5OnScreenKeyboard::useFACES = false;
+bool M5OnScreenKeyboard::useCardKB = false;
+bool M5OnScreenKeyboard::useJoyStick = false;
+bool M5OnScreenKeyboard::usePLUSEncoder = false;
+
+uint16_t M5OnScreenKeyboard::fontColor[2]   = {0xFFFF, 0xFFFF};
+uint16_t M5OnScreenKeyboard::backColor[2]   = {0x630C, 0x421F};
+uint16_t M5OnScreenKeyboard::frameColor[2]  = {0x0208, 0xFFFF};
+uint16_t M5OnScreenKeyboard::textboxFontColor = 0x0000;
+uint16_t M5OnScreenKeyboard::textboxBackColor = 0xFFFF;
+int16_t M5OnScreenKeyboard::font = 1;
+uint8_t M5OnScreenKeyboard::keyHeight = 14;
+
+uint16_t M5OnScreenKeyboard::msecHold = 300;
+uint16_t M5OnScreenKeyboard::msecRepeat= 150;
+uint16_t M5OnScreenKeyboard::msecMorseInput = 700;
+uint8_t M5OnScreenKeyboard::maxlength = 52;
+
+
 enum 
 { TABLECOUNT  = 4
 , ROWCOUNT    = 4
@@ -177,9 +198,9 @@ bool M5OnScreenKeyboard::loop() {
   if (useFACES && Wire.requestFrom(0x08, 1)) {
     while (Wire.available()){
       char key = Wire.read();
-      if (key == 0)    { _flgFACESKB = true; continue; }
-      if (key == 0xff) { _flgFACESKB = false; continue; }
-      press = true;
+      if (key == 0xff)   { _flgFACESKB = false; continue; }
+      else if (key == 0) { _flgFACESKB = true; continue; }
+      else press = true;
       if (canRepeat) {
         ++_repeat;
         if (_flgFACESKB) {

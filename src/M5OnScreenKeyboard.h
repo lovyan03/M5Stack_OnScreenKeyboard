@@ -7,26 +7,25 @@
 class M5OnScreenKeyboard
 {
 public:
-  bool useTextbox = true;
-  bool useOver0x80Chars = false;
-  bool useFACES = false;
-  bool useCardKB = false;
-  bool useJoyStick = false;
-  bool usePLUSEncoder = false;
+  static bool useTextbox;
+  static bool useOver0x80Chars;
+  static bool useFACES;
+  static bool useCardKB;
+  static bool useJoyStick;
+  static bool usePLUSEncoder;
 
-  uint16_t fontColor[2]   = {0xFFFF, 0xFFFF};
-  uint16_t backColor[2]   = {0x630C, 0x421F};
-  uint16_t frameColor[2]  = {0x0208, 0xFFFF};
-  uint16_t textboxFontColor = 0x0000;
-  uint16_t textboxBackColor = 0xFFFF;
+  static uint16_t fontColor[2];
+  static uint16_t backColor[2];
+  static uint16_t frameColor[2];
+  static uint16_t textboxFontColor;
+  static uint16_t textboxBackColor;
+  static int16_t font;
+  static uint8_t keyHeight;
 
-  uint16_t msecHold = 300;
-  uint16_t msecRepeat= 150;
-  uint16_t msecMorseInput = 700;
-  uint8_t maxlength = 52;
-
-  int16_t font = 1;
-  uint8_t keyHeight = 14;
+  static uint16_t msecHold;
+  static uint16_t msecRepeat;
+  static uint16_t msecMorseInput;
+  static uint8_t maxlength;
 
   void setup(const String& value = "");
   bool loop();
