@@ -206,9 +206,10 @@ bool M5OnScreenKeyboard::loop() {
         if (_flgFACESKB) {
           if (!inputKB(key)) return false;
         } else {
-          if (!(key & 0x40)) { switchTable(); }
-          if (!(key & 0x10)) { pressKey();   }
-          if (!(key & 0x20)) { pressKey(BS); } // FACES GameBoy B btn: BS assign.
+          if (!(key & 0x80)) { return false; }  // FACES GameBoy Start: Finish.
+          if (!(key & 0x40)) { switchTable(); } // FACES GameBoy Select: Panel Switch.
+          if (!(key & 0x10)) { pressKey();   }  // FACES GameBoy A btn: Input.
+          if (!(key & 0x20)) { pressKey(BS); }  // FACES GameBoy B btn: BS key.
           _col += (0 == (key & 0x08)) ? 1 : (0 == (key & 0x04)) ? -1 : 0;
           _row += (0 == (key & 0x02)) ? 1 : (0 == (key & 0x01)) ? -1 : 0;
         }
@@ -341,11 +342,13 @@ void M5OnScreenKeyboard::switchTable() {
 
 bool M5OnScreenKeyboard::inputKB(char key)
 {
+// FACES  cursor:0x80~0x83
+// CardKB cursor:0xB4~0xB7
   switch (key) {
   case 0x0D: return false;
-  case 0x81: pressKey(LEFT); break;
-  case 0x83: pressKey(RIGH); break;
-  case BS:   pressKey(key);  break;
+  case 0x81: case 0xB4: pressKey(LEFT); break;
+  case 0x83: case 0xB7: pressKey(RIGH); break;
+  case BS:              pressKey(key);  break;
   default:
     if (0x20 <= key && key < 0x80) {
       pressKey(key);
