@@ -204,7 +204,7 @@ bool M5OnScreenKeyboard::loop() {
       if (canRepeat) {
         ++_repeat;
         if (_flgFACESKB) {
-          inputKB(key);
+          if (!inputKB(key)) return false;
         } else {
           if (!(key & 0x40)) { switchTable(); }
           if (!(key & 0x10)) { pressKey();   }
@@ -222,7 +222,7 @@ bool M5OnScreenKeyboard::loop() {
       press = true;
       if (canRepeat) {
         ++_repeat;
-        inputKB(key);
+        if (!inputKB(key)) return false;
       }
     }
   }
@@ -339,9 +339,10 @@ void M5OnScreenKeyboard::switchTable() {
   _tbl = ++_tbl % (TABLECOUNT - (useOver0x80Chars?0:1));
 }
 
-void M5OnScreenKeyboard::inputKB(char key)
+bool M5OnScreenKeyboard::inputKB(char key)
 {
   switch (key) {
+  case 0x0D: return false;
   case 0x81: pressKey(LEFT); break;
   case 0x83: pressKey(RIGH); break;
   case BS:   pressKey(key);  break;
@@ -351,6 +352,7 @@ void M5OnScreenKeyboard::inputKB(char key)
     }
     break;
   }
+  return true;
 }
 void M5OnScreenKeyboard::pressKey() {
   pressKey(_chartbl[_tbl][_row][_col]);

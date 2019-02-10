@@ -63,7 +63,7 @@ private:
   int getY(int row) const;
   void updateButton();
   void switchTable();
-  void inputKB(char key);
+  bool inputKB(char key);
   void pressKey();
   void pressKey(char keycode);
   void clearMorse();
