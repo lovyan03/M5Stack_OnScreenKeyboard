@@ -70,7 +70,7 @@ M5OnScreenKeyboard m5osk;
 
 ## Licence
 
-[LGPL v2.1](https://github.com/lovyan03/M5OnScreenKeyboard/blob/master/LICENSE)  
+[LGPL v2.1](https://github.com/lovyan03/M5Stack_OnScreenKeyboard/blob/master/LICENSE)  
 
 ## Author
 

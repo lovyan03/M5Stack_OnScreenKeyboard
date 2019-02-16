@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lovyan03/M5OnScreenKeyboard"
+    "url": "https://github.com/lovyan03/M5Stack_OnScreenKeyboard"
   },
   "dependencies": {
   	"name": "M5Stack"
