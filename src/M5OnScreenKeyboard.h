@@ -20,13 +20,15 @@ public:
   static uint16_t frameColor[2];
   static uint16_t textboxFontColor;
   static uint16_t textboxBackColor;
-  static int16_t font;
   static uint8_t keyHeight;
 
   static uint16_t msecHold;
   static uint16_t msecRepeat;
   static uint16_t msecMorseInput;
   static uint8_t maxlength;
+
+  static void setTextFont(int f) { gfxFont = NULL; font = f; }
+  static void setFreeFont(const GFXfont* f) { gfxFont = f; font = 1; }
 
   void setup(const String& value = "");
   bool loop();
@@ -38,6 +40,9 @@ public:
   void setString(const String& value = "");
   char getKeyCode() const { return _keyCode; }
 private:
+  static int16_t font;
+  static const GFXfont* gfxFont;
+
   enum eState
   { APPEAR
   , LEFTRIGHT
@@ -76,6 +81,7 @@ private:
   void drawKeyboard(int h = -1);
   void drawColumn(int col);
   void drawColumn(int col, int x, int y, int h);
+  void applyFont();
   bool appear();
 };
 

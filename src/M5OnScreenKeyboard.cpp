@@ -16,8 +16,9 @@ uint16_t M5OnScreenKeyboard::backColor[2]   = {0x630C, 0x421F};
 uint16_t M5OnScreenKeyboard::frameColor[2]  = {0x0208, 0xFFFF};
 uint16_t M5OnScreenKeyboard::textboxFontColor = 0x0000;
 uint16_t M5OnScreenKeyboard::textboxBackColor = 0xFFFF;
-int16_t M5OnScreenKeyboard::font = 1;
 uint8_t M5OnScreenKeyboard::keyHeight = 14;
+int16_t M5OnScreenKeyboard::font = 1;
+const GFXfont* M5OnScreenKeyboard::gfxFont = NULL;
 
 uint16_t M5OnScreenKeyboard::msecHold = 300;
 uint16_t M5OnScreenKeyboard::msecRepeat= 150;
@@ -115,6 +116,7 @@ void M5OnScreenKeyboard::setup(const String& value) {
 }
 
 bool M5OnScreenKeyboard::loop() {
+  applyFont();
   _keyCode = 0;
   M5.Lcd.setTextSize(1);
   if (_state == APPEAR && !appear()) return true;
@@ -248,7 +250,7 @@ bool M5OnScreenKeyboard::loop() {
     }
   }
 #endif
-//#ifndef _M5JOYSTICK_H_
+#ifdef _M5JOYSTICK_H_
   if (useJoyStick && JoyStick.update()) {
     if (!JoyStick.isNeutral()) {
       press = true;
@@ -263,9 +265,7 @@ bool M5OnScreenKeyboard::loop() {
     if (JoyStick.wasClicked()) { ++_repeat; pressKey(); }
     if (JoyStick.wasHold()) { switchTable(); }
   }
-//#endif
-  updateButton();
-  _btnDrawer.draw();
+#endif
   if (oldCol != _col
    || oldRow != _row
    || oldTbl != _tbl
@@ -298,6 +298,8 @@ bool M5OnScreenKeyboard::loop() {
                         , M5.Lcd.fontHeight(font)
                         , (_msec / 150) % 2 ? textboxBackColor : textboxFontColor);
   }
+  updateButton();
+  _btnDrawer.draw();
   return true;
 }
 void M5OnScreenKeyboard::close() { 
@@ -527,6 +529,16 @@ void M5OnScreenKeyboard::drawColumn(int col, int x, int y, int h) {
     int tmpy = y + r * kh;
     drawKeyTop(col, r, x, tmpy, kh);
     M5.Lcd.drawFastHLine(x, tmpy, KEYWIDTH, frameColor[0]);
+  }
+}
+
+void M5OnScreenKeyboard::applyFont()
+{
+  if (gfxFont) {
+    M5.Lcd.setFreeFont(gfxFont);
+  } else {
+    M5.Lcd.setTextFont(0);
+    M5.Lcd.setTextFont(font);
   }
 }
 

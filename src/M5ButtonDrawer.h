@@ -10,7 +10,8 @@ public:
   static uint16_t fontColor[2];
   static int16_t width;
   static int16_t height;
-  static int16_t font;
+  static void setTextFont(int f) { gfxFont = NULL; font = f; }
+  static void setFreeFont(const GFXfont* f) { gfxFont = f; font = 1; }
   M5ButtonDrawer(){};
   M5ButtonDrawer(const String& btnA, const String& btnB, const String& btnC)
    : _titles{btnA,btnB,btnC}
@@ -22,6 +23,8 @@ public:
   void draw(uint8_t idx, bool pressed);
 
 private:
+  static int16_t font;
+  static const GFXfont* gfxFont;
   String _titles[3];
   bool _mod[3];
   void drawButton(int x, bool pressed, const String& title) const;

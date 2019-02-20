@@ -25,15 +25,19 @@ void setup() {
   m5osk.textboxFontColor = 0xFFFF;
   m5osk.textboxBackColor = 0x8410;
   m5osk.keyHeight = 20;
-  m5osk.font = 2;
+  m5osk.setTextFont(2);
+
+  //m5osk.keyHeight = 24;
+  //m5osk.setFreeFont(&FreeMono9pt7b);
+  //m5osk.setFreeFont(&FreeSans9pt7b);
 
   M5ButtonDrawer::fontColor[0] = 0xFFFF;
   M5ButtonDrawer::fontColor[1] = 0x0000;
   M5ButtonDrawer::backColor[0] = 0x0010;
   M5ButtonDrawer::backColor[1] = 0xF79E;
-  M5ButtonDrawer::width = 90;
+  M5ButtonDrawer::width = 100;
   M5ButtonDrawer::height = 20;
-  M5ButtonDrawer::font = 2;
+  M5ButtonDrawer::setTextFont(2);
 //*/
 
 /* // response speed change example.

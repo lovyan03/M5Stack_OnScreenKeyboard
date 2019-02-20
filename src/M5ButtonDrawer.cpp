@@ -6,6 +6,7 @@ uint16_t M5ButtonDrawer::fontColor[2]  = { 0xffff,0xffff };
 int16_t M5ButtonDrawer::width = 64;
 int16_t M5ButtonDrawer::height = 14;
 int16_t M5ButtonDrawer::font = 1;
+const GFXfont* M5ButtonDrawer::gfxFont = NULL;
 
 void M5ButtonDrawer::setText(const String& btnA, const String& btnB, const String& btnC) {
   setText(0, btnA);
@@ -29,28 +30,32 @@ void M5ButtonDrawer::draw(bool force)
 void M5ButtonDrawer::draw(uint8_t idx, bool pressed)
 {
   _mod[idx] = false;
-  drawButton(idx * 96 + 64, pressed, _titles[idx]);
+  drawButton((idx - 1) * (96 + (84 < width ? (width - 84) / 2 : 0)) + 160, pressed, _titles[idx]);
 }
 
 void M5ButtonDrawer::drawButton(int x, bool pressed, const String& title) const
 {
+  M5.Lcd.setTextSize(1);
+  if (gfxFont) {
+    M5.Lcd.setFreeFont(gfxFont);
+  } else {
+    M5.Lcd.setTextFont(0);
+    M5.Lcd.setTextFont(font);
+  }
+  M5.Lcd.setTextColor(fontColor[pressed]);
+  int16_t fh = M5.Lcd.fontHeight(font);
+  if (gfxFont && 12 < fh) fh = fh * 9 / 10;
+
   int rx = x - width / 2;
   int ry = M5.Lcd.height() - height;
   int rw = width;
   int rh = height;
-  int fy = ry + (rh - M5.Lcd.fontHeight(font))/2;
+  int fy = ry + (rh - fh)/2;
   uint16_t color = frameColor[pressed];
   M5.Lcd.drawRect(rx+1,ry  ,rw-2,rh   ,color);
   M5.Lcd.drawRect(rx  ,ry+1,rw  ,rh-2 ,color);
-  rx+=2;
-  ry+=2;
-  rw-=4;
-  rh-=4;
 
-  M5.Lcd.setTextSize(1);
-  M5.Lcd.setTextColor(fontColor[pressed]);
-
-  M5.Lcd.fillRect(rx, ry, rw, rh, backColor[pressed]);
+  M5.Lcd.fillRect(rx+2, ry+2, rw-4, rh-4, backColor[pressed]);
   M5.Lcd.drawCentreString(title, x, fy, font);
 }
 
