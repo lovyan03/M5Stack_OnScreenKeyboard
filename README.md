@@ -53,6 +53,7 @@ in morse code mode:
 M5OnScreenKeyboard m5osk;
 
   m5osk.useFACES = true;       // FACES unit support.
+  m5osk.useCardKB = true;      // CARDKB unit support.
   m5osk.useJoyStick = true;    // JoyStick unit support.
   m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
   // m5osk.swapBtnBC = true;   // BtnB/BtnC KeyAssign swap.
