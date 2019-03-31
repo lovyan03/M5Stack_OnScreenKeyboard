@@ -1,5 +1,5 @@
 {
-  "name": "M5OnScreenKeyboard",
+  "name": "M5Stack_OnScreenKeyboard",
   "description": "OnScreenKeyboard for M5Stack",
   "keywords": "onscreenkeyboard, m5stack, esp32",
   "authors": {
@@ -14,7 +14,7 @@
   "dependencies": {
   	"name": "M5Stack"
   },
-  "version": "0.3.0",
+  "version": "0.3.1",
   "framework": "arduino",
   "platforms": "espressif32",
   "build": {
