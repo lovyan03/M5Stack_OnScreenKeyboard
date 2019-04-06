@@ -3,7 +3,7 @@
 uint16_t M5ButtonDrawer::frameColor[2] = { 0xA514,0xffff };
 uint16_t M5ButtonDrawer::backColor[2]  = { 0x0000,0x0000 };
 uint16_t M5ButtonDrawer::fontColor[2]  = { 0xffff,0xffff };
-int16_t M5ButtonDrawer::width = 64;
+int16_t M5ButtonDrawer::width = 72;
 int16_t M5ButtonDrawer::height = 14;
 int16_t M5ButtonDrawer::font = 1;
 const GFXfont* M5ButtonDrawer::gfxFont = NULL;

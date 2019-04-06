@@ -50,10 +50,11 @@ static const PROGMEM char _chartbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT]
      , {'Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', '.', '@',RIGH}
      }
     , {{'!', '"', '#', '$', '%', '&','\'', '`', '^', '~', BS }
-     , {'<', '>', '[', ']', '{', '}', '(', ')', '=','\\', DEL}
-     , {'_', '|', ',', ';', ':', '?', '+', '*', '-', '/',LEFT}
-     , {'.', '.', '.', '.', '.', '.', '.', ' ', '.', '@',RIGH}
+     , {'\t','<', '>', '[', ']', '{', '}', '(', ')', '\\', DEL}
+     , {'\r','|', ';', ':', '_', '=', '+', '-', '*', '/',LEFT}
+     , {'\n','.', '.', '.', '.', '?', ',', ' ', '.', '@',RIGH}
      }
+
     , {{0x80, 0x84, 0x88, 0x8c, 0x90, 0x94, 0x98, 0x9c, 0xa0, 0xa4, BS }
      , {0x81, 0x85, 0x89, 0x8d, 0x91, 0x95, 0x99, 0x9d, 0xa1, 0xa5, DEL}
      , {0x82, 0x86, 0x8a, 0x8e, 0x92, 0x96, 0x9a, 0x9e, 0xa2, 0xa6, LEFT}
@@ -66,11 +67,12 @@ static const PROGMEM uint8_t _morsetbl[TABLECOUNT][ROWCOUNT][COLUMNCOUNT]
      , {0x06, 0x0f, 0x0b, 0x1d, 0x09, 0x1f, 0x18, 0x0a, 0x1b, 0x2d, 0}
      , {0x13, 0x16, 0x15, 0x1e, 0x17, 0x05, 0x04, 0x1c, 0x6a, 0x65, 0}
      }
-    , {{0x54, 0x6d, 0x25, 0x7b, 0x22, 0x37, 0x61 ,0x5a, 0x7f, 0x63, 0x10}
-     , {0x28, 0x50, 0x33, 0x66, 0x32, 0x64, 0x29 ,0x52, 0x2e, 0x2a, 0}
-     , {0x72, 0x4a, 0x4c, 0x55, 0x47, 0x73, 0x35 ,0x3d, 0x5e, 0x2d, 0}
-     , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0x1c, 0x6a, 0x65, 0}
+    , {{0x54, 0x6d, 0x25, 0x7b, 0x22, 0x37, 0x61, 0x5a, 0x7f, 0x63, 0x10}
+     , {0   , 0x28, 0x50, 0x33, 0x66, 0x32, 0x64, 0x29, 0x52, 0x2a, 0}
+     , {0x1a, 0x4a, 0x55, 0x47, 0x72, 0x2e, 0x35, 0x5e, 0x3d, 0x2d, 0}
+     , {0   , 0   , 0   , 0   , 0   , 0x73, 0x4c, 0x1c, 0x6a, 0x65, 0}
      }
+
     , {{0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0x10}
      , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0}
      , {0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0   , 0}
@@ -91,6 +93,28 @@ static uint8_t calcMorse(uint8_t m)
     else res += flg ? 3:5;
   }
   return res;
+}
+
+static void drawCodeSymbol(uint8_t code, int x, int y, uint16_t color)
+{
+  switch (code) {
+  case '\t':
+    M5.Lcd.drawFastHLine(x    , y + 3, 5, color);
+    M5.Lcd.drawFastVLine(x + 3, y + 2, 3, color);
+    break;
+  case '\n':
+    M5.Lcd.drawFastVLine(x + 2, y + 1, 5, color);
+    M5.Lcd.drawFastHLine(x + 1, y + 4, 3, color);
+    break;
+  case '\r':
+    M5.Lcd.drawFastHLine(x    , y + 3, 5, color);
+    M5.Lcd.drawFastVLine(x + 1, y + 2, 3, color);
+    break;
+  default:
+    M5.Lcd.drawRect(x + 1, y + 2, 4, 4, color);
+    break;
+  }
+  M5.Lcd.setCursor(x + 6, y);
 }
 
 void M5OnScreenKeyboard::setString(const String& value) {
@@ -292,8 +316,7 @@ bool M5OnScreenKeyboard::loop() {
   }
   // draw blink cursor.
   if (useTextbox) {
-    int x = M5.Lcd.textWidth(_string.substring(0, _cursorPos), font);
-    M5.Lcd.drawFastVLine( x
+    M5.Lcd.drawFastVLine( _cursorX
                         , getY(-1) + (keyHeight - M5.Lcd.fontHeight(font)) / 2
                         , M5.Lcd.fontHeight(font)
                         , (_msec / 150) % 2 ? textboxBackColor : textboxFontColor);
@@ -340,6 +363,7 @@ bool M5OnScreenKeyboard::inputKB(char key)
   case 0x0D: return false;
   case 0x81: case 0xB4: pressKey(LEFT); break;
   case 0x83: case 0xB7: pressKey(RIGH); break;
+  case '\t':
   case BS:              pressKey(key);  break;
   default:
     if (0x20 <= key && key < 0x80) {
@@ -450,8 +474,11 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y, int kh)
   char* str = tbl;
   char code = _chartbl[_tbl][r][c];
   switch (code) {
+  case '\t':  str = "TAB"; break;
+  case '\r':  str = "CR";  break;
+  case '\n':  str = "LF";  break;
   case BS  :  str = "BS";  break;
-  case DEL :  str = "DEL";  break;
+  case DEL :  str = "DEL"; break;
   case LEFT:  str = "<<";  break;
   case RIGH:  str = ">>";  break;
   }
@@ -494,10 +521,23 @@ void M5OnScreenKeyboard::draw() {
 
 void M5OnScreenKeyboard::drawTextbox() {
   int y = getY(-1);
+  int ty = y + (keyHeight - M5.Lcd.fontHeight(font)) / 2;
+  int oldX = M5.Lcd.getCursorX();
+  int oldY = M5.Lcd.getCursorY();
   M5.Lcd.setTextColor(textboxFontColor);
   M5.Lcd.drawFastHLine(0, y, M5.Lcd.width(), frameColor[0]);
   M5.Lcd.fillRect(0, y + 1, M5.Lcd.width(), keyHeight - 1, textboxBackColor);
-  M5.Lcd.drawString(_string, 1, y + (keyHeight - M5.Lcd.fontHeight(font)) / 2, font);
+  M5.Lcd.setCursor(1, ty, font);
+  _cursorX = 0;
+  for (int i = 0; i < _string.length(); ++i) {
+    if (_string[i] < 0x20) {
+      drawCodeSymbol(_string[i], M5.Lcd.getCursorX(), y + (keyHeight - 8) / 2, textboxFontColor);
+    } else {
+      M5.Lcd.print(_string[i]);
+    }
+    if (_cursorPos == i + 1) _cursorX = M5.Lcd.getCursorX() - 1;
+  }
+  M5.Lcd.setCursor(oldX, oldY);
 }
 
 void M5OnScreenKeyboard::drawKeyboard(int h) {

@@ -55,6 +55,7 @@ private:
   int8_t _col = 0;
   int8_t _row = 0;
   int8_t _cursorPos = 0;
+  int16_t _cursorX = 0;
   uint32_t _msec = 0;
   uint32_t _msecLast = 0;
   int _repeat;
