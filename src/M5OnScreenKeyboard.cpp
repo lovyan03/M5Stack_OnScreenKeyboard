@@ -193,6 +193,7 @@ bool M5OnScreenKeyboard::loop() {
           switch (_state) {
           case LEFTRIGHT: if (++_repeat < COLUMNCOUNT) --_col; break;
           case UPDOWN:    if (++_repeat < ROWCOUNT)    --_row; break;
+          default: break;
           }
         }
       }
@@ -222,6 +223,7 @@ bool M5OnScreenKeyboard::loop() {
        && btnC.releasedFor(msecMorseInput)
        && _morseInputBuf) { ++_repeat; inputMorse(); }
       break;
+    default: break;
     }
   }
   if (useFACES && Wire.requestFrom(0x08, 1)) {
@@ -271,6 +273,7 @@ bool M5OnScreenKeyboard::loop() {
       if (PLUSEncoder.wasHold())     { _state = LEFTRIGHT; }
       if (PLUSEncoder.wasClicked())  { ++_repeat; pressKey(); _state = LEFTRIGHT; }
       break;
+    default: break;
     }
   }
 #endif
@@ -328,7 +331,6 @@ bool M5OnScreenKeyboard::loop() {
 void M5OnScreenKeyboard::close() { 
   int y = getY(-1);
   M5.Lcd.fillRect(0, y, M5.Lcd.width(), M5.Lcd.height() - y, 0);
-  _state == APPEAR;
   clearString();
 }
 
@@ -348,11 +350,12 @@ void M5OnScreenKeyboard::updateButton() {
     case LEFTRIGHT: _btnDrawer.setText("Panel/Left" , swapBtnBC?"Right":"Row", swapBtnBC?"Row":"Right"); break;
     case UPDOWN:    _btnDrawer.setText("Panel/Up"   , swapBtnBC?"Down" :"Ok" , swapBtnBC?"Ok" :"Down" ); break;
     case MORSE:     _btnDrawer.setText("Panel/Fn"   , "."  , "_"  ); break;
+    default: break;
     }
   }
 }
 void M5OnScreenKeyboard::switchTable() {
-  _tbl = ++_tbl % (TABLECOUNT - (useOver0x80Chars?0:1));
+  _tbl = (_tbl + 1) % (TABLECOUNT - (useOver0x80Chars ? 0 : 1));
 }
 
 bool M5OnScreenKeyboard::inputKB(char key)
@@ -474,13 +477,13 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y, int kh)
   char* str = tbl;
   char code = _chartbl[_tbl][r][c];
   switch (code) {
-  case '\t':  str = "TAB"; break;
-  case '\r':  str = "CR";  break;
-  case '\n':  str = "LF";  break;
-  case BS  :  str = "BS";  break;
-  case DEL :  str = "DEL"; break;
-  case LEFT:  str = "<<";  break;
-  case RIGH:  str = ">>";  break;
+  case '\t':  str = (char*)PROGMEM "TAB"; break;
+  case '\r':  str = (char*)PROGMEM "CR";  break;
+  case '\n':  str = (char*)PROGMEM "LF";  break;
+  case BS  :  str = (char*)PROGMEM "BS";  break;
+  case DEL :  str = (char*)PROGMEM "DEL"; break;
+  case LEFT:  str = (char*)PROGMEM "<<";  break;
+  case RIGH:  str = (char*)PROGMEM ">>";  break;
   }
   uint16_t color = fontColor[_col == c && _row == r ? 1 : 0];
   int fy = min(y + (kh - fh + 1) / 2 + moffset, M5.Lcd.height() - M5ButtonDrawer::height - fh);
