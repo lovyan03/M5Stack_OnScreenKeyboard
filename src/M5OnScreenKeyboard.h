@@ -13,6 +13,7 @@ public:
   static bool useCardKB;
   static bool useJoyStick;
   static bool usePLUSEncoder;
+  static bool useFACESEncoder;
   static bool swapBtnBC;
 
   static uint16_t fontColor[2];

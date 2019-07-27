@@ -12,7 +12,7 @@ OnScreenKeyboard which can be operated with 3 button.
 M5Stack本体の３ボタンで操作できるオンスクリーンキーボード。  
 簡単な文字入力にお使いいただけます。  
 
-Support FACES Keyboard and GameBoy unit.  
+Support FACES Keyboard and GameBoy and Encoder unit.  
 Support PLUS Encoder unit.  
 Support JoyStick unit.  
 Support CardKB unit.  
@@ -56,6 +56,7 @@ M5OnScreenKeyboard m5osk;
   m5osk.useCardKB = true;      // CARDKB unit support.
   m5osk.useJoyStick = true;    // JoyStick unit support.
   m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
+  m5osk.useFACESEncoder = true;// FACES Encoder unit support.
   // m5osk.swapBtnBC = true;   // BtnB/BtnC KeyAssign swap.
 
   m5osk.setup();

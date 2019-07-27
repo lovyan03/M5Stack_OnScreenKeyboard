@@ -1,6 +1,7 @@
 #include <M5OnScreenKeyboard.h>
 
 #include <M5PLUSEncoder.h>
+#include <M5FACESEncoder.h>
 #include <M5JoyStick.h>
 
 bool M5OnScreenKeyboard::useTextbox = true;
@@ -9,6 +10,7 @@ bool M5OnScreenKeyboard::useFACES = false;
 bool M5OnScreenKeyboard::useCardKB = false;
 bool M5OnScreenKeyboard::useJoyStick = false;
 bool M5OnScreenKeyboard::usePLUSEncoder = false;
+bool M5OnScreenKeyboard::useFACESEncoder = false;
 bool M5OnScreenKeyboard::swapBtnBC = false;
 
 uint16_t M5OnScreenKeyboard::fontColor[2]   = {0xFFFF, 0xFFFF};
@@ -288,8 +290,8 @@ bool M5OnScreenKeyboard::loop() {
   if (usePLUSEncoder && PLUSEncoder.update()) {
     switch (_state) {
     case LEFTRIGHT:   // left right moving
-      if (PLUSEncoder.wasUp())       { --_col; }
-      if (PLUSEncoder.wasDown())     { ++_col; }
+      if (PLUSEncoder.wasUp())       { ++_col; }
+      if (PLUSEncoder.wasDown())     { --_col; }
       if (PLUSEncoder.wasHold())     { switchTable(); break; } 
       if (PLUSEncoder.wasClicked())  { _state = UPDOWN; }
       break;
@@ -298,6 +300,25 @@ bool M5OnScreenKeyboard::loop() {
       if (PLUSEncoder.wasDown())     { ++_row; }
       if (PLUSEncoder.wasHold())     { _state = LEFTRIGHT; }
       if (PLUSEncoder.wasClicked())  { ++_repeat; pressKey(); _state = LEFTRIGHT; }
+      break;
+    default: break;
+    }
+  }
+#endif
+#ifdef _M5FACESENCODER_H_
+  if (useFACESEncoder && FACESEncoder.update()) {
+    switch (_state) {
+    case LEFTRIGHT:   // left right moving
+      if (FACESEncoder.wasUp())       { ++_col; }
+      if (FACESEncoder.wasDown())     { --_col; }
+      if (FACESEncoder.wasHold())     { switchTable(); break; } 
+      if (FACESEncoder.wasClicked())  { _state = UPDOWN; }
+      break;
+    case UPDOWN:    // up down moving
+      if (FACESEncoder.wasUp())       { --_row; }
+      if (FACESEncoder.wasDown())     { ++_row; }
+      if (FACESEncoder.wasHold())     { _state = LEFTRIGHT; }
+      if (FACESEncoder.wasClicked())  { ++_repeat; pressKey(); _state = LEFTRIGHT; }
       break;
     default: break;
     }
