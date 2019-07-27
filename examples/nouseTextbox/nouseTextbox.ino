@@ -15,6 +15,7 @@ void setup() {
   m5osk.useCardKB = true;      // CARDKB unit support.
   m5osk.useJoyStick = true;    // JoyStick unit support.
   m5osk.usePLUSEncoder = true; // PLUS Encoder unit support.
+  m5osk.useFACESEncoder = true;// FACES Encoder unit support.
 
 }
 void loop() {

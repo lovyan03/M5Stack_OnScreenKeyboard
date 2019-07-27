@@ -1,6 +1,7 @@
 #include <M5OnScreenKeyboard.h>
 
 #include <M5PLUSEncoder.h>
+#include <M5FACESEncoder.h>
 #include <M5JoyStick.h>
 
 bool M5OnScreenKeyboard::useTextbox = true;
@@ -9,6 +10,7 @@ bool M5OnScreenKeyboard::useFACES = false;
 bool M5OnScreenKeyboard::useCardKB = false;
 bool M5OnScreenKeyboard::useJoyStick = false;
 bool M5OnScreenKeyboard::usePLUSEncoder = false;
+bool M5OnScreenKeyboard::useFACESEncoder = false;
 bool M5OnScreenKeyboard::swapBtnBC = false;
 
 uint16_t M5OnScreenKeyboard::fontColor[2]   = {0xFFFF, 0xFFFF};
@@ -128,8 +130,13 @@ void M5OnScreenKeyboard::clearString() {
 }
 
 void M5OnScreenKeyboard::setup(const String& value) {
+#ifdef ARDUINO_ODROID_ESP32
+  _btnHeight = 0;
+#else
+  _btnHeight = M5ButtonDrawer::height;
   _btnDrawer.setText("","","");
   _btnDrawer.draw(true);
+#endif
   setString(value);
   _tbl = 0;
   _col = 0;
@@ -156,6 +163,27 @@ bool M5OnScreenKeyboard::loop() {
   bool canRepeat = _repeat == 0 || (_msec - _msecLast) >= (1 < _repeat ? msecRepeat : msecHold);
 
   bool press = false;
+
+#ifdef ARDUINO_ODROID_ESP32
+  if (M5.BtnStart .wasPressed()) { return false; }
+  if (M5.BtnSelect.wasPressed()) { press = true; switchTable(); }
+  if (M5.BtnA     .isPressed()) { press = true; if (canRepeat) { ++_repeat; pressKey(); } }
+  if (M5.BtnB     .isPressed()) { press = true; if (canRepeat) { ++_repeat; pressKey(BS); } }
+  if (M5.JOY_X.isAxisPressed() != DPAD_V_NONE) {
+    press = true;
+    if (canRepeat) {
+      ++_repeat;
+      _col += (M5.JOY_X.isAxisPressed() == DPAD_V_HALF) ? 1 : -1;
+    }
+  }
+  if (M5.JOY_Y.isAxisPressed() != DPAD_V_NONE) {
+    press = true;
+    if (canRepeat) {
+      ++_repeat;
+      _row += (M5.JOY_Y.isAxisPressed() == DPAD_V_HALF) ? 1 : -1;
+    }
+  }
+#else
   Button& btnB(swapBtnBC ? M5.BtnC : M5.BtnB);
   Button& btnC(swapBtnBC ? M5.BtnB : M5.BtnC);
 
@@ -193,6 +221,7 @@ bool M5OnScreenKeyboard::loop() {
           switch (_state) {
           case LEFTRIGHT: if (++_repeat < COLUMNCOUNT) --_col; break;
           case UPDOWN:    if (++_repeat < ROWCOUNT)    --_row; break;
+          default: break;
           }
         }
       }
@@ -222,6 +251,7 @@ bool M5OnScreenKeyboard::loop() {
        && btnC.releasedFor(msecMorseInput)
        && _morseInputBuf) { ++_repeat; inputMorse(); }
       break;
+    default: break;
     }
   }
   if (useFACES && Wire.requestFrom(0x08, 1)) {
@@ -260,8 +290,8 @@ bool M5OnScreenKeyboard::loop() {
   if (usePLUSEncoder && PLUSEncoder.update()) {
     switch (_state) {
     case LEFTRIGHT:   // left right moving
-      if (PLUSEncoder.wasUp())       { --_col; }
-      if (PLUSEncoder.wasDown())     { ++_col; }
+      if (PLUSEncoder.wasUp())       { ++_col; }
+      if (PLUSEncoder.wasDown())     { --_col; }
       if (PLUSEncoder.wasHold())     { switchTable(); break; } 
       if (PLUSEncoder.wasClicked())  { _state = UPDOWN; }
       break;
@@ -271,6 +301,26 @@ bool M5OnScreenKeyboard::loop() {
       if (PLUSEncoder.wasHold())     { _state = LEFTRIGHT; }
       if (PLUSEncoder.wasClicked())  { ++_repeat; pressKey(); _state = LEFTRIGHT; }
       break;
+    default: break;
+    }
+  }
+#endif
+#ifdef _M5FACESENCODER_H_
+  if (useFACESEncoder && FACESEncoder.update()) {
+    switch (_state) {
+    case LEFTRIGHT:   // left right moving
+      if (FACESEncoder.wasUp())       { ++_col; }
+      if (FACESEncoder.wasDown())     { --_col; }
+      if (FACESEncoder.wasHold())     { switchTable(); break; } 
+      if (FACESEncoder.wasClicked())  { _state = UPDOWN; }
+      break;
+    case UPDOWN:    // up down moving
+      if (FACESEncoder.wasUp())       { --_row; }
+      if (FACESEncoder.wasDown())     { ++_row; }
+      if (FACESEncoder.wasHold())     { _state = LEFTRIGHT; }
+      if (FACESEncoder.wasClicked())  { ++_repeat; pressKey(); _state = LEFTRIGHT; }
+      break;
+    default: break;
     }
   }
 #endif
@@ -289,6 +339,7 @@ bool M5OnScreenKeyboard::loop() {
     if (JoyStick.wasClicked()) { ++_repeat; pressKey(); }
     if (JoyStick.wasHold()) { switchTable(); }
   }
+#endif
 #endif
   if (oldCol != _col
    || oldRow != _row
@@ -321,19 +372,20 @@ bool M5OnScreenKeyboard::loop() {
                         , M5.Lcd.fontHeight(font)
                         , (_msec / 150) % 2 ? textboxBackColor : textboxFontColor);
   }
+#ifndef ARDUINO_ODROID_ESP32
   updateButton();
   _btnDrawer.draw();
+#endif
   return true;
 }
 void M5OnScreenKeyboard::close() { 
   int y = getY(-1);
   M5.Lcd.fillRect(0, y, M5.Lcd.width(), M5.Lcd.height() - y, 0);
-  _state == APPEAR;
   clearString();
 }
 
 int M5OnScreenKeyboard::getX(int col) const { return col * KEYWIDTH; }
-int M5OnScreenKeyboard::getY(int row) const { return M5.Lcd.height() - M5ButtonDrawer::height - (ROWCOUNT - row) * keyHeight; }
+int M5OnScreenKeyboard::getY(int row) const { return M5.Lcd.height() - _btnHeight - (ROWCOUNT - row) * keyHeight; }
 
 void M5OnScreenKeyboard::updateButton() {
   if (M5.BtnA.isPressed() || _fn) {
@@ -348,11 +400,12 @@ void M5OnScreenKeyboard::updateButton() {
     case LEFTRIGHT: _btnDrawer.setText("Panel/Left" , swapBtnBC?"Right":"Row", swapBtnBC?"Row":"Right"); break;
     case UPDOWN:    _btnDrawer.setText("Panel/Up"   , swapBtnBC?"Down" :"Ok" , swapBtnBC?"Ok" :"Down" ); break;
     case MORSE:     _btnDrawer.setText("Panel/Fn"   , "."  , "_"  ); break;
+    default: break;
     }
   }
 }
 void M5OnScreenKeyboard::switchTable() {
-  _tbl = ++_tbl % (TABLECOUNT - (useOver0x80Chars?0:1));
+  _tbl = (_tbl + 1) % (TABLECOUNT - (useOver0x80Chars ? 0 : 1));
 }
 
 bool M5OnScreenKeyboard::inputKB(char key)
@@ -474,16 +527,16 @@ void M5OnScreenKeyboard::drawKeyTop(int c, int r, int x, int y, int kh)
   char* str = tbl;
   char code = _chartbl[_tbl][r][c];
   switch (code) {
-  case '\t':  str = "TAB"; break;
-  case '\r':  str = "CR";  break;
-  case '\n':  str = "LF";  break;
-  case BS  :  str = "BS";  break;
-  case DEL :  str = "DEL"; break;
-  case LEFT:  str = "<<";  break;
-  case RIGH:  str = ">>";  break;
+  case '\t':  str = (char*)PROGMEM "TAB"; break;
+  case '\r':  str = (char*)PROGMEM "CR";  break;
+  case '\n':  str = (char*)PROGMEM "LF";  break;
+  case BS  :  str = (char*)PROGMEM "BS";  break;
+  case DEL :  str = (char*)PROGMEM "DEL"; break;
+  case LEFT:  str = (char*)PROGMEM "<<";  break;
+  case RIGH:  str = (char*)PROGMEM ">>";  break;
   }
   uint16_t color = fontColor[_col == c && _row == r ? 1 : 0];
-  int fy = min(y + (kh - fh + 1) / 2 + moffset, M5.Lcd.height() - M5ButtonDrawer::height - fh);
+  int fy = min(y + (kh - fh + 1) / 2 + moffset, M5.Lcd.height() - _btnHeight - fh);
   M5.Lcd.setTextColor(color);
   M5.Lcd.drawCentreString(str, x + 16, fy, font);
   if (_state == MORSE) {
@@ -542,7 +595,7 @@ void M5OnScreenKeyboard::drawTextbox() {
 
 void M5OnScreenKeyboard::drawKeyboard(int h) {
   if (h < 0) h = keyHeight * ROWCOUNT;
-  int y = M5.Lcd.height() - M5ButtonDrawer::height - h;
+  int y = M5.Lcd.height() - _btnHeight - h;
   for (int c = 0; c < COLUMNCOUNT; ++c) {
     int x = getX(c);
     drawColumn(c, x, y, h);

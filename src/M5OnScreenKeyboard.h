@@ -13,6 +13,7 @@ public:
   static bool useCardKB;
   static bool useJoyStick;
   static bool usePLUSEncoder;
+  static bool useFACESEncoder;
   static bool swapBtnBC;
 
   static uint16_t fontColor[2];
@@ -65,6 +66,7 @@ private:
   uint8_t _morseInputBuf;
   bool _flgFACESKB;
   M5ButtonDrawer _btnDrawer;
+  uint8_t _btnHeight;
 
   int getX(int col) const;
   int getY(int row) const;
